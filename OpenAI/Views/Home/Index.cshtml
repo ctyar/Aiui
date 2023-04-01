@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IndexViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -9,8 +10,17 @@
 </form>
 
 <ul>
-@foreach (var message in ViewBag.Data)
+@foreach (var message in Model.Messages)
 {
     <li>@message</li>
 }
+</ul>
+
+@Model.SqlQuery
+
+<ul>
+    @foreach (var employee in Model.Employees)
+    {
+        <li>@employee.Id @employee.Name @employee.Salary</li>
+    }
 </ul>

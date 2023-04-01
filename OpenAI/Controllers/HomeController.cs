@@ -1,34 +1,35 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OpenAI.Models;
 
 namespace OpenAI.Controllers;
 
 public class HomeController : Controller
 {
     private readonly AIService _aIService;
+    private readonly EmployeeService _employeeService;
 
-    public HomeController(AIService aIService)
+    public HomeController(AIService aIService, EmployeeService employeeService)
     {
         _aIService = aIService;
+        _employeeService = employeeService;
     }
 
     public IActionResult Index()
     {
-        ViewBag.Data = new List<string>();
+        var model = new IndexViewModel();
 
-        return View();
+        return View(model);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Index(string query)
+    public async Task<IActionResult> Index(string prompt)
     {
-        var response = await _aIService.GetAsync(query);
+        var sqlQuery = await _aIService.GetAsync(prompt);
 
-        ViewBag.Data = new List<string>
-        {
-            query,
-            response
-        };
+        var employees = await _employeeService.GetAsync(sqlQuery);
 
-        return View();
+        var model = new IndexViewModel(new() { prompt }, sqlQuery, employees);
+
+        return View(model);
     }
 }

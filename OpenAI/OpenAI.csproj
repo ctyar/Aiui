@@ -4,7 +4,10 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <PackageReference Include="Betalgo.OpenAI.GPT3" Version="6.8.3" />
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Betalgo.OpenAI.GPT3" Version="6.8.3" />
+  </ItemGroup>
 
 </Project>

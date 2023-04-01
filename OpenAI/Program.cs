@@ -8,6 +8,8 @@ public class Program
 
         builder.Services.AddControllersWithViews();
 
+        builder.Services.AddSingleton<AIService>();
+
         var app = builder.Build();
 
         if (!app.Environment.IsDevelopment())

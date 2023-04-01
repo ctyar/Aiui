@@ -8,4 +8,9 @@
     <input type="submit">
 </form>
 
-@Html.Raw(ViewBag.Data)
+<ul>
+@foreach (var message in ViewBag.Data)
+{
+    <li>@message</li>
+}
+</ul>

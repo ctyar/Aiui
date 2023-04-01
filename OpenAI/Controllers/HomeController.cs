@@ -4,22 +4,30 @@ namespace OpenAI.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    private readonly AIService _aIService;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(AIService aIService)
     {
-        _logger = logger;
+        _aIService = aIService;
     }
 
     public IActionResult Index()
     {
+        ViewBag.Data = new List<string>();
+
         return View();
     }
 
     [HttpPost]
-    public IActionResult Index(string query)
+    public async Task<IActionResult> Index(string query)
     {
-        ViewBag.Data = "Hello!<br />World";
+        var response = await _aIService.GetAsync(query);
+
+        ViewBag.Data = new List<string>
+        {
+            query,
+            response
+        };
 
         return View();
     }

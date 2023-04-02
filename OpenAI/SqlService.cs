@@ -3,24 +3,24 @@ using Microsoft.Data.SqlClient;
 
 namespace OpenAI;
 
-public class EmployeeService
+public class SqlService
 {
     private readonly string _connectionString;
-    private readonly ILogger<EmployeeService> _logger;
+    private readonly ILogger<SqlService> _logger;
 
-    public EmployeeService(IConfiguration configuration, ILogger<EmployeeService> logger)
+    public SqlService(IConfiguration configuration, ILogger<SqlService> logger)
     {
         _connectionString = configuration.GetConnectionString("SqlServer") ?? throw new Exception("SqlServer connection string not found.");
         _logger = logger;
     }
 
-    public async Task<List<Employee>> GetAsync(string query)
+    public async Task<List<dynamic>> GetAsync(string query)
     {
         using var connection = new SqlConnection(_connectionString);
 
         try
         {
-            var result = (await connection.QueryAsync<Employee>(query)).ToList();
+            var result = (await connection.QueryAsync(query)).ToList();
 
             return result;
         }
@@ -30,13 +30,4 @@ public class EmployeeService
             return new();
         }
     }
-}
-
-public class Employee
-{
-    public int Id { get; set; }
-
-    public string Name { get; set; } = null!;
-
-    public decimal Salary { get; set; }
 }

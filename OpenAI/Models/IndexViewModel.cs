@@ -6,19 +6,19 @@ public class IndexViewModel
 
     public string SqlQuery { get; }
 
-    public List<Employee> Employees { get; }
+    public List<dynamic> Data { get; }
 
     public IndexViewModel()
     {
         Messages = new();
         SqlQuery = string.Empty;
-        Employees = new();
+        Data = new List<dynamic>();
     }
 
-    public IndexViewModel(List<string> messages, string sqlQuery, List<Employee> employees)
+    public IndexViewModel(List<string> messages, string sqlQuery, List<dynamic> data)
     {
         Messages = messages;
         SqlQuery = sqlQuery;
-        Employees = employees;
+        Data = data;
     }
 }

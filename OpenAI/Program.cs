@@ -9,7 +9,7 @@ public class Program
         builder.Services.AddControllersWithViews();
 
         builder.Services.AddSingleton<AIService>();
-        builder.Services.AddSingleton<EmployeeService>();
+        builder.Services.AddSingleton<SqlService>();
 
         var app = builder.Build();
 

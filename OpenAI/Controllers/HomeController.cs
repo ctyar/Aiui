@@ -6,9 +6,9 @@ namespace OpenAI.Controllers;
 public class HomeController : Controller
 {
     private readonly AIService _aIService;
-    private readonly EmployeeService _employeeService;
+    private readonly SqlService _employeeService;
 
-    public HomeController(AIService aIService, EmployeeService employeeService)
+    public HomeController(AIService aIService, SqlService employeeService)
     {
         _aIService = aIService;
         _employeeService = employeeService;
@@ -26,9 +26,11 @@ public class HomeController : Controller
     {
         var sqlQuery = await _aIService.GetAsync(prompt);
 
-        var employees = await _employeeService.GetAsync(sqlQuery);
+        sqlQuery = sqlQuery.Replace("```", "");
 
-        var model = new IndexViewModel(new() { prompt }, sqlQuery, employees);
+        var data = await _employeeService.GetAsync(sqlQuery);
+
+        var model = new IndexViewModel(new() { prompt }, sqlQuery, data);
 
         return View(model);
     }

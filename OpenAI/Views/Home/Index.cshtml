@@ -9,18 +9,39 @@
     <input type="submit">
 </form>
 
-<ul>
 @foreach (var message in Model.Messages)
 {
-    <li>@message</li>
+    <p>@message</p>
 }
-</ul>
 
-@Model.SqlQuery
+<p>
+    @Model.SqlQuery
+</p>
 
-<ul>
-    @foreach (var employee in Model.Employees)
-    {
-        <li>@employee.Id @employee.Name @employee.Salary</li>
-    }
-</ul>
+<table id="dataTable" class="display" style="width:100%">
+    <thead>
+        <tr>
+            @foreach (var keyValuePair in Model.Data.FirstOrDefault() ?? Array.Empty<string>())
+            {
+                <th>@keyValuePair.Key</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var row in Model.Data)
+        {
+            <tr>
+                @foreach (var keyValuePair in row)
+                {
+                    <td>@keyValuePair.Value</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    setTimeout(() => {
+        $('#dataTable').DataTable();
+    }, 1000);
+</script>

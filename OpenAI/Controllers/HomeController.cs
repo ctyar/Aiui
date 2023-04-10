@@ -6,12 +6,12 @@ namespace OpenAI.Controllers;
 public class HomeController : Controller
 {
     private readonly AIService _aIService;
-    private readonly SqlService _employeeService;
+    private readonly IDatabaseService _databaseService;
 
-    public HomeController(AIService aIService, SqlService employeeService)
+    public HomeController(AIService aIService, IDatabaseService databaseService)
     {
         _aIService = aIService;
-        _employeeService = employeeService;
+        _databaseService = databaseService;
     }
 
     public IActionResult Index()
@@ -24,11 +24,13 @@ public class HomeController : Controller
     [HttpPost]
     public async Task<IActionResult> Index(string prompt)
     {
-        var sqlQuery = await _aIService.GetAsync(prompt);
+        var schema = await _databaseService.GetSchemaAsync();
+
+        var sqlQuery = await _aIService.GetAsync(schema, prompt);
 
         sqlQuery = sqlQuery.Replace("```", "");
 
-        var data = await _employeeService.GetAsync(sqlQuery);
+        var data = await _databaseService.GetAsync(sqlQuery);
 
         var model = new IndexViewModel(new() { prompt }, sqlQuery, data);
 

@@ -5,13 +5,13 @@ namespace OpenAI.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly AIService _aIService;
-    private readonly IDatabaseService _databaseService;
+    private readonly IBotService _botService;
+    private readonly IConfiguration _configuration;
 
-    public HomeController(AIService aIService, IDatabaseService databaseService)
+    public HomeController(IBotService botService, IConfiguration configuration)
     {
-        _aIService = aIService;
-        _databaseService = databaseService;
+        _botService = botService;
+        _configuration = configuration;
     }
 
     public IActionResult Index()
@@ -24,15 +24,12 @@ public class HomeController : Controller
     [HttpPost]
     public async Task<IActionResult> Index(string prompt)
     {
-        var schema = await _databaseService.GetSchemaAsync();
+        var connectionString = _configuration.GetConnectionString("SqlServer") ?? throw new Exception("Missing SQL Server connection string.");
+        var tableNames = new List<string> { "Products", "Categories" };
 
-        var sqlQuery = await _aIService.GetAsync(schema, prompt);
+        var executionResult = await _botService.ExecutePromptAsync(connectionString, tableNames, prompt);
 
-        sqlQuery = sqlQuery.Replace("```", "");
-
-        var data = await _databaseService.GetAsync(sqlQuery);
-
-        var model = new IndexViewModel(new() { prompt }, sqlQuery, data);
+        var model = new IndexViewModel(new() { prompt }, executionResult);
 
         return View(model);
     }

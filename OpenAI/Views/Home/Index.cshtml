@@ -14,31 +14,44 @@
     <p>@message</p>
 }
 
-<p>
-    @Model.SqlQuery
-</p>
+@if (Model.ExecutionResult is not null)
+{
+    <button type="button" class="collapsible">Schema</button>
+    <div class="content">
+    @foreach (var message in Model.ExecutionResult.Schema)
+    {
+        <p>
+            @message
+        </p>
+    }
+    </div>
 
-<table id="dataTable" class="display" style="width:100%">
-    <thead>
-        <tr>
-            @foreach (var keyValuePair in Model.Data.FirstOrDefault() ?? Array.Empty<string>())
-            {
-                <th>@keyValuePair.Key</th>
-            }
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var row in Model.Data)
-        {
+    <p>
+        @Model.ExecutionResult.Query
+    </p>
+
+    <table id="dataTable" class="display" style="width:100%">
+        <thead>
             <tr>
-                @foreach (var keyValuePair in row)
+                @foreach (var keyValuePair in Model.ExecutionResult.Rows.FirstOrDefault() ?? Array.Empty<string>())
                 {
-                    <td>@keyValuePair.Value</td>
+                    <th>@keyValuePair.Key</th>
                 }
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var row in Model.ExecutionResult.Rows)
+            {
+                <tr>
+                    @foreach (var keyValuePair in row)
+                    {
+                        <td>@keyValuePair.Value</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 <script type="text/javascript">
     setTimeout(() => {

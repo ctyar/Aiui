@@ -10,6 +10,7 @@
     <PackageReference Include="Betalgo.OpenAI.GPT3" Version="6.8.3" />
     <PackageReference Include="Dapper" Version="2.0.123" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
+    <PackageReference Include="DatabaseSchemaReader" Version="2.8.0" />
   </ItemGroup>
 
 </Project>

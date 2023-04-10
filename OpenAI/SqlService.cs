@@ -1,37 +1,67 @@
 ﻿using Dapper;
+using DatabaseSchemaReader.DataSchema;
 using Microsoft.Data.SqlClient;
 
 namespace OpenAI;
 
-internal class SqlService : IDatabaseService
+internal class SqlServerService : IDatabaseService
 {
     private readonly string _connectionString;
-    private readonly ILogger<SqlService> _logger;
+    private readonly ILogger<SqlServerService> _logger;
 
-    public SqlService(IConfiguration configuration, ILogger<SqlService> logger)
+    public SqlServerService(IConfiguration configuration, ILogger<SqlServerService> logger)
     {
         _connectionString = configuration.GetConnectionString("SqlServer") ?? throw new Exception("SqlServer connection string not found.");
         _logger = logger;
     }
 
-    public Task<List<string>> GetSchemaAsync()
+    public Task<List<string>> GetSchemaAsync(string connectionString, List<string> tables)
     {
+        var tablesSchema = GetSchema(connectionString, tables);
+
         var result = new List<string>
         {
-            "Imagine we have a SQL Server table called Products. This table has 10 columns",
-            "Column 1 called ProductID which is a an integer auto increment primary key",
-            "Column 2 called ProductName is non nullable nvarchar which has the name of the product",
-            "Column 3 called SupplierID is a nullable foreign key to table Suppliers which has the supplier's information",
-            "Column 4 called CategoryID is a nullable foreign key to table Categories which has the products category information",
-            "Column 5 called QuantityPerUnit is a nullable nvarchar which has the product's quantity for each unit",
-            "Column 6 called UnitPrice is a nullable money which has the product's price",
-            "Column 7 called UnitsInStock is a nullable smallint which shows how many units of the product we have in stock",
-            "Column 8 called UnitsOnOrder is a nullable smallint which shows how many units of the product we ordered right now",
-            "Column 9 called ReorderLevel is a nullable smallint",
-            "Column 10 called Discontinued is a non nullable bit which shows if the product is discontinued or not or if it is inactive or active",
+            "Imagine we have a SQL Server database with these tables."
         };
 
+        foreach (var table in tablesSchema)
+        {
+            result.Add($"A table called {table.Name} with {table.Columns.Count} columns");
+
+            var prompts = GetPrompts(table);
+
+            result.AddRange(prompts);
+        }
+
         return Task.FromResult(result);
+    }
+
+    private static List<DatabaseTable> GetSchema(string connectionString, List<string> tables)
+    {
+        using var sqlConnection = new SqlConnection(connectionString);
+        var dbReader = new DatabaseSchemaReader.DatabaseReader(sqlConnection);
+
+        var schema = dbReader.ReadAll();
+
+        return schema.Tables.Where(item => tables.Contains(item.Name)).ToList();
+    }
+
+    private static List<string> GetPrompts(DatabaseTable databaseTable)
+    {
+        var result = new List<string>();
+        var i = 1;
+
+        foreach (var column in databaseTable.Columns)
+        {
+            var nullability = column.Nullable ? "nullable" : "non nullable";
+            var primaryKey = column.IsPrimaryKey ? "primary key" : string.Empty;
+            var foreignKey = column.IsForeignKey ? "foreign key" : string.Empty;
+
+            result.Add($"Column {i} called {column.Name} which is a an {nullability} {column.DataType.TypeName} {primaryKey} {foreignKey}");
+            i++;
+        }
+
+        return result;
     }
 
     public async Task<List<dynamic>> GetAsync(string query)

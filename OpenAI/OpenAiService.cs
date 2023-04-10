@@ -4,11 +4,11 @@ using OpenAI.GPT3.ObjectModels.RequestModels;
 
 namespace OpenAI;
 
-public class AIService
+public class OpenAiService
 {
     private readonly OpenAIService _openAIService;
 
-    public AIService(IConfiguration configuration)
+    public OpenAiService(IConfiguration configuration)
     {
         _openAIService = new OpenAIService(new OpenAiOptions()
         {

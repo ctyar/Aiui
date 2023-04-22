@@ -478,5 +478,3 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-
-OpenAI/appsettings.Development.json

@@ -3,15 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenAI", "OpenAI\OpenAI.csproj", "{C3D5EC4C-6303-4459-8DBF-58CEA036E61C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B220657B-B436-471A-A41A-6A7A1BE6BE92}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aiui", "src\Aiui\Aiui.csproj", "{359A36F0-256F-48E9-A3FD-95D1532B0D06}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiui", "src\Aiui\Aiui.csproj", "{359A36F0-256F-48E9-A3FD-95D1532B0D06}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C3D5EC4C-6303-4459-8DBF-58CEA036E61C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C3D5EC4C-6303-4459-8DBF-58CEA036E61C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C3D5EC4C-6303-4459-8DBF-58CEA036E61C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C3D5EC4C-6303-4459-8DBF-58CEA036E61C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{359A36F0-256F-48E9-A3FD-95D1532B0D06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{359A36F0-256F-48E9-A3FD-95D1532B0D06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{359A36F0-256F-48E9-A3FD-95D1532B0D06}.Release|Any CPU.ActiveCfg = Release|Any CPU

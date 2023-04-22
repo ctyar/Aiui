@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
+    <RootNamespace>Aiui</RootNamespace>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>preview</AnalysisLevel>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Aiui</PackageId>
+    <PackageTags></PackageTags>
+    <Title>Aiui</Title>
+    <Description>A package to use AI chat bots as a user interface to interact with database.</Description>
+    <Authors>Shahriyar Qulami</Authors>
+    <PackageProjectUrl>https://github.com/ctyar/Aiui</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ctyar/Aiui</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Betalgo.OpenAI.GPT3" Version="6.8.3" />
+    <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
+    <PackageReference Include="DatabaseSchemaReader" Version="2.8.0" />
+  </ItemGroup>
+
+</Project>

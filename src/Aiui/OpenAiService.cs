@@ -1,22 +1,25 @@
-﻿using OpenAI.GPT3;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using OpenAI.GPT3;
 using OpenAI.GPT3.Managers;
 using OpenAI.GPT3.ObjectModels.RequestModels;
 
-namespace OpenAI;
+namespace Aiui;
 
-public class OpenAiService
+public sealed class OpenAiService
 {
     private readonly OpenAIService _openAIService;
 
-    public OpenAiService(IConfiguration configuration)
+    public OpenAiService(string _openAIApiKey)
     {
         _openAIService = new OpenAIService(new OpenAiOptions()
         {
-            ApiKey = configuration.GetValue<string>("OpenApiKey") ?? throw new Exception("OpenApiKey missing")
+            ApiKey = _openAIApiKey
         });
     }
 
-    public async Task<string> GetAsync(List<string> schema, string prompt)
+    public async Task<string?> GetAsync(List<string> schema, string prompt)
     {
         var messages = schema.Select(ChatMessage.FromSystem).ToList();
 
@@ -28,12 +31,12 @@ public class OpenAiService
         var completionResult = await _openAIService.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
         {
             Messages = messages,
-            Model = GPT3.ObjectModels.Models.ChatGpt3_5Turbo,
+            Model = OpenAI.GPT3.ObjectModels.Models.ChatGpt3_5Turbo,
         });
 
         if (!completionResult.Successful)
         {
-            throw new Exception(completionResult.Error?.Message);
+            return null;
         }
 
         return completionResult.Choices.First().Message.Content;

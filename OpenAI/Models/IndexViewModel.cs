@@ -1,4 +1,6 @@
-﻿namespace OpenAI.Models;
+﻿using Aiui;
+
+namespace OpenAI.Models;
 
 public class IndexViewModel
 {

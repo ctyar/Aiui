@@ -1,16 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Aiui;
+using Microsoft.AspNetCore.Mvc;
 using OpenAI.Models;
 
 namespace OpenAI.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly IBotService _botService;
     private readonly IConfiguration _configuration;
 
-    public HomeController(IBotService botService, IConfiguration configuration)
+    public HomeController(IConfiguration configuration)
     {
-        _botService = botService;
         _configuration = configuration;
     }
 
@@ -27,7 +26,8 @@ public class HomeController : Controller
         var connectionString = _configuration.GetConnectionString("SqlServer") ?? throw new Exception("Missing SQL Server connection string.");
         var tableNames = new List<string> { "Products", "Categories" };
 
-        var executionResult = await _botService.ExecutePromptAsync(connectionString, tableNames, prompt);
+        var botService = new BotService(connectionString);
+        var executionResult = await botService.ExecutePromptAsync(connectionString, tableNames, prompt);
 
         var model = new IndexViewModel(new() { prompt }, executionResult);
 

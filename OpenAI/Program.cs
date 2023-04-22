@@ -8,10 +8,6 @@ public class Program
 
         builder.Services.AddControllersWithViews();
 
-        builder.Services.AddSingleton<IBotService, BotService>();
-        builder.Services.AddSingleton<IDatabaseService, SqlServerService>();
-        builder.Services.AddSingleton<OpenAiService>();
-
         var app = builder.Build();
 
         if (!app.Environment.IsDevelopment())

@@ -1,27 +1,26 @@
-﻿using Dapper;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dapper;
 using DatabaseSchemaReader.DataSchema;
 using Microsoft.Data.SqlClient;
 
-namespace OpenAI;
+namespace Aiui;
 
-internal class SqlServerService : IDatabaseService
+internal class SqlServerService
 {
-    private readonly string _connectionString;
-    private readonly ILogger<SqlServerService> _logger;
-
-    public SqlServerService(IConfiguration configuration, ILogger<SqlServerService> logger)
+    public List<string>? GetSchema(string connectionString, List<string> tables)
     {
-        _connectionString = configuration.GetConnectionString("SqlServer") ?? throw new Exception("SqlServer connection string not found.");
-        _logger = logger;
-    }
+        var tablesSchema = GetSchemaCore(connectionString, tables);
 
-    public Task<List<string>> GetSchemaAsync(string connectionString, List<string> tables)
-    {
-        var tablesSchema = GetSchema(connectionString, tables);
+        if (tablesSchema is null)
+        {
+            return null;
+        }
 
         var result = new List<string>
         {
-            "Imagine we have a SQL Server database with these tables."
+            "Imagine we have a Microsoft SQL Server database with these tables."
         };
 
         foreach (var table in tablesSchema)
@@ -33,17 +32,25 @@ internal class SqlServerService : IDatabaseService
             result.AddRange(prompts);
         }
 
-        return Task.FromResult(result);
+        return result;
     }
 
-    private static List<DatabaseTable> GetSchema(string connectionString, List<string> tables)
+    private static List<DatabaseTable>? GetSchemaCore(string connectionString, List<string> tables)
     {
         using var sqlConnection = new SqlConnection(connectionString);
-        var dbReader = new DatabaseSchemaReader.DatabaseReader(sqlConnection);
 
-        var schema = dbReader.ReadAll();
+        try
+        {
+            var dbReader = new DatabaseSchemaReader.DatabaseReader(sqlConnection);
 
-        return schema.Tables.Where(item => tables.Contains(item.Name)).ToList();
+            var schema = dbReader.ReadAll();
+
+            return schema.Tables.Where(item => tables.Contains(item.Name)).ToList();
+        }
+        catch (SqlException)
+        {
+            return null;
+        }
     }
 
     private static List<string> GetPrompts(DatabaseTable databaseTable)
@@ -64,9 +71,9 @@ internal class SqlServerService : IDatabaseService
         return result;
     }
 
-    public async Task<List<dynamic>> GetAsync(string query)
+    public async Task<List<dynamic>?> GetAsync(string connectionString, string query)
     {
-        using var connection = new SqlConnection(_connectionString);
+        using var connection = new SqlConnection(connectionString);
 
         try
         {
@@ -74,10 +81,9 @@ internal class SqlServerService : IDatabaseService
 
             return result;
         }
-        catch (Exception e)
+        catch (SqlException e)
         {
-            _logger.LogError(e, "Sql query failed: {Query}", query);
-            return new();
+            return null;
         }
     }
 }

@@ -14,44 +14,51 @@
     <p>@message</p>
 }
 
-@if (Model.ExecutionResult is not null)
+@if (Model.ExecutionResult is null)
 {
-    <button type="button" class="collapsible">Schema</button>
-    <div class="content">
-    @foreach (var message in Model.ExecutionResult.Schema)
-    {
-        <p>
-            @message
-        </p>
-    }
-    </div>
+    return;
+}
 
+@if (!Model.ExecutionResult.IsSuccessful)
+{
+    <p>Failed to execute the prompt</p>
+}
+
+<button type="button" class="collapsible">Schema</button>
+<div class="content">
+@foreach (var message in Model.ExecutionResult.Schema ?? new())
+{
     <p>
-        @Model.ExecutionResult.Query
+        @message
     </p>
+}
+</div>
 
-    <table id="dataTable" class="display" style="width:100%">
-        <thead>
+<p>
+    @Model.ExecutionResult.Query
+</p>
+
+<table id="dataTable" class="display" style="width:100%">
+    <thead>
+        <tr>
+            @foreach (var keyValuePair in Model.ExecutionResult?.Rows?.FirstOrDefault() ?? Array.Empty<string>())
+            {
+                <th>@keyValuePair.Key</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var row in Model.ExecutionResult?.Rows ?? new())
+        {
             <tr>
-                @foreach (var keyValuePair in Model.ExecutionResult.Rows.FirstOrDefault() ?? Array.Empty<string>())
+                @foreach (var keyValuePair in row)
                 {
-                    <th>@keyValuePair.Key</th>
+                    <td>@keyValuePair.Value</td>
                 }
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var row in Model.ExecutionResult.Rows)
-            {
-                <tr>
-                    @foreach (var keyValuePair in row)
-                    {
-                        <td>@keyValuePair.Value</td>
-                    }
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+        }
+    </tbody>
+</table>
 
 <script type="text/javascript">
     setTimeout(() => {

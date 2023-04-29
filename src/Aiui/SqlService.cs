@@ -4,11 +4,19 @@ using System.Threading.Tasks;
 using Dapper;
 using DatabaseSchemaReader.DataSchema;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 
 namespace Aiui;
 
-internal class SqlServerService
+public sealed class SqlServerService
 {
+    private readonly ILogger<SqlServerService> _logger;
+
+    public SqlServerService(ILogger<SqlServerService> logger)
+    {
+        _logger = logger;
+    }
+
     public List<string>? GetSchema(string connectionString, List<string> tables)
     {
         var tablesSchema = GetSchemaCore(connectionString, tables);
@@ -35,7 +43,7 @@ internal class SqlServerService
         return result;
     }
 
-    private static List<DatabaseTable>? GetSchemaCore(string connectionString, List<string> tables)
+    private List<DatabaseTable>? GetSchemaCore(string connectionString, List<string> tables)
     {
         using var sqlConnection = new SqlConnection(connectionString);
 
@@ -47,8 +55,9 @@ internal class SqlServerService
 
             return schema.Tables.Where(item => tables.Contains(item.Name)).ToList();
         }
-        catch (SqlException)
+        catch (SqlException e)
         {
+            _logger.LogError(e, "Getting schema failed");
             return null;
         }
     }
@@ -71,7 +80,7 @@ internal class SqlServerService
         return result;
     }
 
-    public async Task<List<dynamic>?> GetAsync(string connectionString, string query)
+    public async Task<List<dynamic>?> QueryAsync(string connectionString, string query)
     {
         using var connection = new SqlConnection(connectionString);
 
@@ -83,6 +92,7 @@ internal class SqlServerService
         }
         catch (SqlException e)
         {
+            _logger.LogError(e, "Executing query failed");
             return null;
         }
     }

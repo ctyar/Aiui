@@ -5,45 +5,24 @@ namespace Aiui;
 
 public sealed class BotService
 {
-    private readonly string _openAIApiKey;
-    private SqlServerService? _databaseService;
-    private OpenAiService? _openAiService;
+    private readonly SqlServerService _sqlServerService;
 
-    private SqlServerService DatabaseService
+    public BotService(SqlServerService sqlServerService)
     {
-        get
-        {
-            _databaseService ??= new SqlServerService();
-
-            return _databaseService;
-        }
+        _sqlServerService = sqlServerService;
     }
 
-    private OpenAiService OpenAiService
+    public async Task<ExecutionResult> ExecutePromptAsync(string connectionString, string openAIApiKey, List<string> tableNames, string prompt)
     {
-        get
-        {
-            _openAiService ??= new OpenAiService(_openAIApiKey);
-
-            return _openAiService;
-        }
-    }
-
-    public BotService(string openAIApiKey)
-    {
-        _openAIApiKey = openAIApiKey;
-    }
-
-    public async Task<ExecutionResult> ExecutePromptAsync(string connectionString, List<string> tableNames, string prompt)
-    {
-        var schema = DatabaseService.GetSchema(connectionString, tableNames);
+        var schema = _sqlServerService.GetSchema(connectionString, tableNames);
 
         if (schema is null)
         {
             return new ExecutionResult();
         }
 
-        var sqlQuery = await OpenAiService.GetAsync(schema, prompt);
+        var openAiSevce = new OpenAiService(openAIApiKey);
+        var sqlQuery = await openAiSevce.GetAsync(schema, prompt);
 
         if (sqlQuery is null)
         {
@@ -52,7 +31,7 @@ public sealed class BotService
 
         sqlQuery = sqlQuery.Replace("```", "");
 
-        var data = await DatabaseService.GetAsync(connectionString, sqlQuery);
+        var data = await _sqlServerService.QueryAsync(connectionString, sqlQuery);
 
         if (data is null)
         {

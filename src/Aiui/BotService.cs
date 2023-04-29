@@ -29,7 +29,7 @@ public sealed class BotService
             return new ExecutionResult(schema);
         }
 
-        sqlQuery = sqlQuery.Replace("```", "");
+        sqlQuery = CleanQuery(sqlQuery);
 
         var data = await _sqlServerService.QueryAsync(connectionString, sqlQuery);
 
@@ -39,5 +39,21 @@ public sealed class BotService
         }
 
         return new ExecutionResult(schema, sqlQuery, data);
+    }
+
+    private static string CleanQuery(string query)
+    {
+        // Remove ``` anywhere in the query
+        query = query.Replace("```", "");
+
+        // Remove everything before the first select
+        var index = query.IndexOf("select", 0, System.StringComparison.OrdinalIgnoreCase);
+
+        if (index <= 1)
+        {
+            return query;
+        }
+
+        return query.Substring(index);
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Azure.AI.OpenAI;
 
@@ -15,6 +17,12 @@ public sealed class BotService
 
     public async Task<ExecutionResult> ExecutePromptAsync(string connectionString, OpenAIClient openAIClient, List<string> tableNames, string prompt, List<string> chatHistory)
     {
+        ArgumentNullException.ThrowIfNull(connectionString);
+        ArgumentNullException.ThrowIfNull(openAIClient);
+        ArgumentNullException.ThrowIfNull(tableNames);
+        ArgumentNullException.ThrowIfNull(prompt);
+        ArgumentNullException.ThrowIfNull(chatHistory);
+
         var newHistory = GetNewHistory(prompt, chatHistory);
 
         var schema = _sqlServerService.GetSchema(connectionString, tableNames);
@@ -53,7 +61,7 @@ public sealed class BotService
         query = query.Replace("```", "");
 
         // Remove everything before the first select
-        var index = query.IndexOf("select", 0, System.StringComparison.OrdinalIgnoreCase);
+        var index = query.IndexOf("select", 0, StringComparison.OrdinalIgnoreCase);
 
         if (index <= 1)
         {
@@ -65,8 +73,10 @@ public sealed class BotService
 
     private List<string> GetNewHistory(string prompt, List<string> chatHistory)
     {
-        chatHistory.Add(prompt);
+        var newChatHistory = chatHistory.ToList();
 
-        return chatHistory;
+        newChatHistory.Add(prompt);
+
+        return newChatHistory;
     }
 }

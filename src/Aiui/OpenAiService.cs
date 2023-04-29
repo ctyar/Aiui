@@ -32,7 +32,7 @@ internal sealed class OpenAIService
         {
             chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, chat));
         }
-        chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, prompt ?? "Write a sql query that selects all the active products"));
+        chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, prompt));
 
         var responseChatCompletions = await _openAIClient.GetChatCompletionsAsync("gpt-3.5-turbo", chatCompletionsOptions);
 

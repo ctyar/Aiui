@@ -4,6 +4,8 @@ namespace Aiui;
 
 public sealed class ExecutionResult
 {
+    public List<string> ChatHistory { get; }
+
     public bool IsSuccessful { get; }
 
     public List<string>? Schema { get; }
@@ -12,26 +14,22 @@ public sealed class ExecutionResult
 
     public List<dynamic>? Rows { get; }
 
-    internal ExecutionResult()
+    internal ExecutionResult(List<string> chatHistory)
     {
+        ChatHistory = chatHistory;
         IsSuccessful = false;
     }
 
-    internal ExecutionResult(List<string> schema)
+    internal ExecutionResult(List<string> chatHistory, List<string> schema)
     {
-        IsSuccessful = false;
-        Schema = schema;
-    }
-
-    internal ExecutionResult(List<string> schema, string query)
-    {
+        ChatHistory = chatHistory;
         IsSuccessful = false;
         Schema = schema;
-        Query = query;
     }
 
-    internal ExecutionResult(List<string> schema, string query, List<dynamic> rows)
+    internal ExecutionResult(List<string> chatHistory, List<string> schema, string query, List<dynamic> rows)
     {
+        ChatHistory = chatHistory;
         IsSuccessful = true;
         Schema = schema;
         Query = query;

@@ -1,44 +1,41 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using OpenAI.GPT3;
-using OpenAI.GPT3.Managers;
-using OpenAI.GPT3.ObjectModels.RequestModels;
+using Azure.AI.OpenAI;
 
 namespace Aiui;
 
-public sealed class OpenAiService
+internal sealed class OpenAIService
 {
-    private readonly OpenAIService _openAIService;
+    private readonly OpenAIClient _openAIClient;
 
-    public OpenAiService(string _openAIApiKey)
+    public OpenAIService(OpenAIClient openAIClient)
     {
-        _openAIService = new OpenAIService(new OpenAiOptions()
-        {
-            ApiKey = _openAIApiKey
-        });
+        _openAIClient = openAIClient;
     }
 
-    public async Task<string?> GetAsync(List<string> schema, string prompt)
+    public async Task<string?> GetAsync(List<string> schema, string prompt, List<string> chatHistory)
     {
-        var messages = schema.Select(ChatMessage.FromSystem).ToList();
+        var chatCompletionsOptions = new ChatCompletionsOptions();
 
-        messages.Add(ChatMessage.FromSystem("When instructed to list or show or create a report create a SQL query with the above knowledge instead"));
-        messages.Add(ChatMessage.FromSystem("When creating a SQL query just write the SQL query itself and nothing else, this is very important"));
-
-        messages.Add(ChatMessage.FromUser(prompt ?? "Write a sql query that selects all the active products"));
-
-        var completionResult = await _openAIService.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
+        foreach (var item in schema)
         {
-            Messages = messages,
-            Model = OpenAI.GPT3.ObjectModels.Models.ChatGpt3_5Turbo,
-        });
-
-        if (!completionResult.Successful)
-        {
-            return null;
+            chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, item));
         }
 
-        return completionResult.Choices.First().Message.Content;
+        chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System,
+            "When instructed to list or show or create a report create a SQL query with the above knowledge instead"));
+
+        chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System,
+            "When creating a SQL query you must be brief and no explanation just write the SQL query itself and nothing else, this is very important"));
+
+        foreach (var chat in chatHistory)
+        {
+            chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, chat));
+        }
+        chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, prompt ?? "Write a sql query that selects all the active products"));
+
+        var responseChatCompletions = await _openAIClient.GetChatCompletionsAsync("gpt-3.5-turbo", chatCompletionsOptions);
+
+        return responseChatCompletions.Value.Choices[0].Message.Content;
     }
 }

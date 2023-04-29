@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Azure.AI.OpenAI;
 
 namespace Aiui;
 
@@ -12,21 +13,23 @@ public sealed class BotService
         _sqlServerService = sqlServerService;
     }
 
-    public async Task<ExecutionResult> ExecutePromptAsync(string connectionString, string openAIApiKey, List<string> tableNames, string prompt)
+    public async Task<ExecutionResult> ExecutePromptAsync(string connectionString, OpenAIClient openAIClient, List<string> tableNames, string prompt, List<string> chatHistory)
     {
+        var newHistory = GetNewHistory(prompt, chatHistory);
+
         var schema = _sqlServerService.GetSchema(connectionString, tableNames);
 
         if (schema is null)
         {
-            return new ExecutionResult();
+            return new ExecutionResult(newHistory);
         }
 
-        var openAiSevce = new OpenAiService(openAIApiKey);
-        var sqlQuery = await openAiSevce.GetAsync(schema, prompt);
+        var openAiSevce = new OpenAIService(openAIClient);
+        var sqlQuery = await openAiSevce.GetAsync(schema, prompt, chatHistory);
 
         if (sqlQuery is null)
         {
-            return new ExecutionResult(schema);
+            return new ExecutionResult(newHistory, schema);
         }
 
         sqlQuery = CleanQuery(sqlQuery);
@@ -35,10 +38,13 @@ public sealed class BotService
 
         if (data is null)
         {
-            return new ExecutionResult(schema, sqlQuery);
+            // Probably just a normal command response
+            newHistory.Add(sqlQuery);
+
+            return new ExecutionResult(newHistory, schema);
         }
 
-        return new ExecutionResult(schema, sqlQuery, data);
+        return new ExecutionResult(newHistory, schema, sqlQuery, data);
     }
 
     private static string CleanQuery(string query)
@@ -55,5 +61,12 @@ public sealed class BotService
         }
 
         return query.Substring(index);
+    }
+
+    private List<string> GetNewHistory(string prompt, List<string> chatHistory)
+    {
+        chatHistory.Add(prompt);
+
+        return chatHistory;
     }
 }

@@ -58,6 +58,7 @@ public sealed class BotService
     private static string CleanQuery(string query)
     {
         // Remove ``` anywhere in the query
+        query = query.Replace("```sql", "");
         query = query.Replace("```", "");
 
         // Remove everything before the first select

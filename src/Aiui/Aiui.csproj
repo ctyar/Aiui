@@ -14,7 +14,9 @@
     <PackageId>Aiui</PackageId>
     <PackageTags></PackageTags>
     <Title>Aiui</Title>
-    <Description>A package to use AI chat bots as a user interface to interact with database.</Description>
+    <Description>This project aims to facilitate the creation of a new type of user interface for line of business applications.
+It will allow users to query data in their application using natural language and lower the barrier of accessing and analyzing data.
+This is similar to how most applications let users export data as excel files to do further analysis on their own.</Description>
     <Authors>Shahriyar Qulami</Authors>
     <PackageProjectUrl>https://github.com/ctyar/Aiui</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ctyar/Aiui</RepositoryUrl>
@@ -30,6 +32,7 @@
     <PackageReference Include="Dapper" Version="2.0.123" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
     <PackageReference Include="DatabaseSchemaReader" Version="2.8.0" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

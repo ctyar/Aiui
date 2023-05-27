@@ -32,8 +32,8 @@ public sealed class BotService
             return new ExecutionResult(newHistory);
         }
 
-        var openAiSevce = new OpenAIService(openAIClient);
-        var sqlQuery = await openAiSevce.GetAsync(schema, prompt, chatHistory);
+        var openAiService = new OpenAIService(openAIClient);
+        var sqlQuery = await openAiService.GetAsync(schema, prompt, chatHistory);
 
         if (sqlQuery is null)
         {

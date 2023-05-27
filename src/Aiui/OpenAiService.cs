@@ -15,11 +15,14 @@ internal sealed class OpenAIService
 
     public async Task<string?> GetAsync(List<string> schema, string prompt, List<string> chatHistory)
     {
-        var chatCompletionsOptions = new ChatCompletionsOptions();
-
-        foreach (var item in schema)
+        var chatCompletionsOptions = new ChatCompletionsOptions()
         {
-            chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, item));
+            Temperature = 0f
+        };
+
+        foreach (var tableSchema in schema)
+        {
+            chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, tableSchema));
         }
 
         chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System,

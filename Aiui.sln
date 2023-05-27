@@ -7,6 +7,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		azure-pipelines.yml = azure-pipelines.yml
+		build.ps1 = build.ps1
+		Directory.Build.props = Directory.Build.props
+		global.json = global.json
+		README.md = README.md
+		version.json = version.json
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiui", "src\Aiui\Aiui.csproj", "{359A36F0-256F-48E9-A3FD-95D1532B0D06}"

@@ -29,7 +29,8 @@ public async Task<IActionResult> Index(string prompt, List<string> chatHistory)
 {
     var tableNames = new List<string> { "Products", "Categories" };
 
-    var executionResult = await _botService.ExecutePromptAsync(connectionString, new OpenAIClient(openAIApiKey), tableNames, prompt, chatHistory);
+    var executionResult = await _botService.ExecutePromptAsync(connectionString, new OpenAIClient(openAIApiKey),
+        tableNames, prompt, chatHistory);
 
     return View(executionResult);
 }

@@ -47,7 +47,7 @@ internal sealed class OpenAIService
             };
             chatCompletionsOptions.Messages.Add(new ChatMessage(role, chat.Content));
         }
-        chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, prompt));
+        chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, $"{prompt}, no explanation"));
 
         var responseChatCompletions = await _openAIClient.GetChatCompletionsAsync("gpt-3.5-turbo", chatCompletionsOptions);
 

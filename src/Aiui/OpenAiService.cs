@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Azure.AI.OpenAI;
 
@@ -13,12 +14,15 @@ internal sealed class OpenAIService
         _openAIClient = openAIClient;
     }
 
-    public async Task<string?> GetAsync(List<string> schema, string prompt, List<string> chatHistory)
+    public async Task<string?> GetAsync(List<string> schema, string prompt, List<Message> chatHistory)
     {
         var chatCompletionsOptions = new ChatCompletionsOptions()
         {
             Temperature = 0f
         };
+
+        chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System,
+            "You are a software developer"));
 
         foreach (var tableSchema in schema)
         {
@@ -31,9 +35,17 @@ internal sealed class OpenAIService
         chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System,
             "When creating a SQL query you must be brief and no explanation just write the SQL query itself and nothing else, this is very important"));
 
-        foreach (var chat in chatHistory)
+        chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System,
+            "Do not give comment or explanation"));
+
+        foreach (var chat in chatHistory.Where(item => item.Type == MessageType.User || item.Type == MessageType.System))
         {
-            chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, chat));
+            var role = chat.Type switch
+            {
+                MessageType.User => ChatRole.User,
+                MessageType.System => ChatRole.System,
+            };
+            chatCompletionsOptions.Messages.Add(new ChatMessage(role, chat.Content));
         }
         chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, prompt));
 

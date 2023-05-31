@@ -15,7 +15,8 @@ public sealed class BotService
         _sqlServerService = sqlServerService;
     }
 
-    public async Task<ExecutionResult> ExecutePromptAsync(string connectionString, OpenAIClient openAIClient, List<string> tableNames, string prompt, List<string> chatHistory)
+    public async Task<ExecutionResult> ExecutePromptAsync(string connectionString, OpenAIClient openAIClient, List<string> tableNames, string prompt,
+        List<Message> chatHistory)
     {
         ArgumentNullException.ThrowIfNull(connectionString);
         ArgumentNullException.ThrowIfNull(openAIClient);
@@ -47,9 +48,21 @@ public sealed class BotService
         if (data is null)
         {
             // Probably just a normal command response
-            newHistory.Add(sqlQuery);
+            newHistory.Add(new Message
+            {
+                Type = MessageType.System,
+                Content = sqlQuery
+            });
 
             return new ExecutionResult(newHistory, schema);
+        }
+        else
+        {
+            newHistory.Add(new Message
+            {
+                Type = MessageType.Info,
+                Content = "Done"
+            });
         }
 
         return new ExecutionResult(newHistory, schema, sqlQuery, data);
@@ -72,11 +85,15 @@ public sealed class BotService
         return query.Substring(index);
     }
 
-    private List<string> GetNewHistory(string prompt, List<string> chatHistory)
+    private static List<Message> GetNewHistory(string prompt, List<Message> chatHistory)
     {
         var newChatHistory = chatHistory.ToList();
 
-        newChatHistory.Add(prompt);
+        newChatHistory.Add(new Message
+        {
+            Type = MessageType.User,
+            Content = prompt
+        });
 
         return newChatHistory;
     }

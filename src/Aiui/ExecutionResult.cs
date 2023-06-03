@@ -10,7 +10,7 @@ public sealed class ExecutionResult
 
     public string? AiResponse { get; }
 
-    public List<dynamic>? Data { get; }
+    public object? Result { get; }
 
     internal ExecutionResult(List<Message> chatHistory)
     {
@@ -25,11 +25,11 @@ public sealed class ExecutionResult
         AiResponse = aiResponse;
     }
 
-    internal ExecutionResult(List<Message> chatHistory, string? aiResponse, List<dynamic> data)
+    internal ExecutionResult(List<Message> chatHistory, string? aiResponse, object? result)
     {
         IsSuccessful = true;
         ChatHistory = chatHistory;
         AiResponse = aiResponse;
-        Data = data;
+        Result = result;
     }
 }

@@ -7,7 +7,7 @@ namespace Aiui;
 
 public interface IPlugin
 {
-    Task<List<ChatMessage>?> BuildPromptAsync(string prompt, ILogger logger);
+    Task<List<ChatMessage>?> BuildPromptAsync(string prompt, object? context, ILogger logger);
 
-    Task<List<dynamic>?> GetDataAsync(string aiResponse, ILogger logger);
+    Task<object?> GetResultAsync(string aiResponse, ILogger logger);
 }

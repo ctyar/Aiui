@@ -20,7 +20,7 @@ public sealed class SqlListPlugin : IPlugin
         _tableNames = tableNames;
     }
 
-    public Task<List<ChatMessage>?> BuildPromptAsync(string prompt, ILogger logger)
+    public Task<List<ChatMessage>?> BuildPromptAsync(string prompt, object? context, ILogger logger)
     {
         var sqlServerService = new SqlServerService(logger);
         var schema = sqlServerService.GetSchema(_connectionString, _tableNames);
@@ -47,7 +47,7 @@ public sealed class SqlListPlugin : IPlugin
         return Task.FromResult(result)!;
     }
 
-    public async Task<List<dynamic>?> GetDataAsync(string aiResponse, ILogger logger)
+    public async Task<object?> GetResultAsync(string aiResponse, ILogger logger)
     {
         var sqlQuery = CleanQuery(aiResponse);
 

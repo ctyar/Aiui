@@ -16,7 +16,7 @@ public sealed class BotService
         _logger = logger;
     }
 
-    public async Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, OpenAIClient openAIClient, string prompt, List<Message> chatHistory)
+    public async Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, OpenAIClient openAIClient, string prompt, List<Message> chatHistory, object? context)
     {
         ArgumentNullException.ThrowIfNull(plugin);
         ArgumentNullException.ThrowIfNull(openAIClient);
@@ -25,7 +25,7 @@ public sealed class BotService
 
         var newHistory = GetNewHistory(prompt, chatHistory);
 
-        var pluginPrompts = await plugin.BuildPromptAsync(prompt, _logger);
+        var pluginPrompts = await plugin.BuildPromptAsync(prompt, context, _logger);
 
         if (pluginPrompts is null)
         {
@@ -40,7 +40,7 @@ public sealed class BotService
             return new ExecutionResult(newHistory);
         }
 
-        var data = await plugin.GetDataAsync(aiResponse, _logger);
+        var data = await plugin.GetResultAsync(aiResponse, _logger);
 
         if (data is null)
         {

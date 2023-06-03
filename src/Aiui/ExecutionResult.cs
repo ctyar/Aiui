@@ -8,31 +8,28 @@ public sealed class ExecutionResult
 
     public bool IsSuccessful { get; }
 
-    public List<string>? Schema { get; }
+    public string? AiResponse { get; }
 
-    public string? Query { get; }
-
-    public List<dynamic>? Rows { get; }
+    public List<dynamic>? Data { get; }
 
     internal ExecutionResult(List<Message> chatHistory)
     {
-        ChatHistory = chatHistory;
         IsSuccessful = false;
+        ChatHistory = chatHistory;
     }
 
-    internal ExecutionResult(List<Message> chatHistory, List<string> schema)
+    internal ExecutionResult(List<Message> chatHistory, string? aiResponse)
     {
-        ChatHistory = chatHistory;
         IsSuccessful = false;
-        Schema = schema;
+        ChatHistory = chatHistory;
+        AiResponse = aiResponse;
     }
 
-    internal ExecutionResult(List<Message> chatHistory, List<string> schema, string query, List<dynamic> rows)
+    internal ExecutionResult(List<Message> chatHistory, string? aiResponse, List<dynamic> data)
     {
-        ChatHistory = chatHistory;
         IsSuccessful = true;
-        Schema = schema;
-        Query = query;
-        Rows = rows;
+        ChatHistory = chatHistory;
+        AiResponse = aiResponse;
+        Data = data;
     }
 }

@@ -3,47 +3,44 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Azure.AI.OpenAI;
+using Microsoft.Extensions.Logging;
 
 namespace Aiui;
 
 public sealed class BotService
 {
-    private readonly SqlServerService _sqlServerService;
+    private readonly ILogger<BotService> _logger;
 
-    public BotService(SqlServerService sqlServerService)
+    public BotService(ILogger<BotService> logger)
     {
-        _sqlServerService = sqlServerService;
+        _logger = logger;
     }
 
-    public async Task<ExecutionResult> ExecutePromptAsync(string connectionString, OpenAIClient openAIClient, List<string> tableNames, string prompt,
-        List<Message> chatHistory)
+    public async Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, OpenAIClient openAIClient, string prompt, List<Message> chatHistory)
     {
-        ArgumentNullException.ThrowIfNull(connectionString);
+        ArgumentNullException.ThrowIfNull(plugin);
         ArgumentNullException.ThrowIfNull(openAIClient);
-        ArgumentNullException.ThrowIfNull(tableNames);
         ArgumentNullException.ThrowIfNull(prompt);
         ArgumentNullException.ThrowIfNull(chatHistory);
 
         var newHistory = GetNewHistory(prompt, chatHistory);
 
-        var schema = _sqlServerService.GetSchema(connectionString, tableNames);
+        var pluginPrompts = await plugin.BuildPromptAsync(prompt, _logger);
 
-        if (schema is null)
+        if (pluginPrompts is null)
+        {
+            return new ExecutionResult(chatHistory);
+        }
+
+        var openAiService = new OpenAIService(openAIClient);
+        var aiResponse = await openAiService.GetAsync(pluginPrompts, chatHistory);
+
+        if (aiResponse is null)
         {
             return new ExecutionResult(newHistory);
         }
 
-        var openAiService = new OpenAIService(openAIClient);
-        var sqlQuery = await openAiService.GetAsync(schema, prompt, chatHistory);
-
-        if (sqlQuery is null)
-        {
-            return new ExecutionResult(newHistory, schema);
-        }
-
-        sqlQuery = CleanQuery(sqlQuery);
-
-        var data = await _sqlServerService.QueryAsync(connectionString, sqlQuery);
+        var data = await plugin.GetDataAsync(aiResponse, _logger);
 
         if (data is null)
         {
@@ -51,10 +48,10 @@ public sealed class BotService
             newHistory.Add(new Message
             {
                 Type = MessageType.System,
-                Content = sqlQuery
+                Content = aiResponse
             });
 
-            return new ExecutionResult(newHistory, schema);
+            return new ExecutionResult(newHistory, aiResponse);
         }
         else
         {
@@ -65,24 +62,7 @@ public sealed class BotService
             });
         }
 
-        return new ExecutionResult(newHistory, schema, sqlQuery, data);
-    }
-
-    private static string CleanQuery(string query)
-    {
-        // Remove ``` anywhere in the query
-        query = query.Replace("```sql", "");
-        query = query.Replace("```", "");
-
-        // Remove everything before the first select
-        var index = query.IndexOf("select", 0, StringComparison.OrdinalIgnoreCase);
-
-        if (index <= 1)
-        {
-            return query;
-        }
-
-        return query.Substring(index);
+        return new ExecutionResult(newHistory, aiResponse, data);
     }
 
     private static List<Message> GetNewHistory(string prompt, List<Message> chatHistory)

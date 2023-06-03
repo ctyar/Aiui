@@ -7,6 +7,5 @@ public static class AiuiExtensions
     public static void AddAiui(this IServiceCollection services)
     {
         services.AddSingleton<BotService>();
-        services.AddSingleton<SqlServerService>();
     }
 }

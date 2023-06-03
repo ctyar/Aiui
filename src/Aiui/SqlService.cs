@@ -8,11 +8,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Aiui;
 
-public sealed class SqlServerService
+internal sealed class SqlServerService
 {
-    private readonly ILogger<SqlServerService> _logger;
+    private readonly ILogger _logger;
 
-    public SqlServerService(ILogger<SqlServerService> logger)
+    public SqlServerService(ILogger logger)
     {
         _logger = logger;
     }

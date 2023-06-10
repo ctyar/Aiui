@@ -32,15 +32,15 @@ public sealed class BotService
             return new ExecutionResult(chatHistory);
         }
 
-        var openAiService = new OpenAIService(openAIClient);
-        var aiResponse = await openAiService.GetAsync(pluginPrompts, chatHistory);
+        var openAIService = new OpenAIService(openAIClient);
+        var response = await openAIService.GetAsync(pluginPrompts, chatHistory);
 
-        if (aiResponse is null)
+        if (response is null)
         {
             return new ExecutionResult(newHistory);
         }
 
-        var data = await plugin.GetResultAsync(aiResponse, _logger);
+        var data = await plugin.GetResultAsync(response, _logger);
 
         if (data is null)
         {
@@ -48,10 +48,10 @@ public sealed class BotService
             newHistory.Add(new Message
             {
                 Type = MessageType.System,
-                Content = aiResponse
+                Content = response
             });
 
-            return new ExecutionResult(newHistory, aiResponse);
+            return new ExecutionResult(newHistory, response);
         }
         else
         {
@@ -62,7 +62,7 @@ public sealed class BotService
             });
         }
 
-        return new ExecutionResult(newHistory, aiResponse, data);
+        return new ExecutionResult(newHistory, response, data);
     }
 
     private static List<Message> GetNewHistory(string prompt, List<Message> chatHistory)

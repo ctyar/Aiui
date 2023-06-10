@@ -29,8 +29,20 @@ public async Task<IActionResult> Index(string prompt, List<string> chatHistory)
 {
     var tableNames = new List<string> { "Products", "Categories" };
 
-    var executionResult = await _botService.ExecutePromptAsync(connectionString, new OpenAIClient(openAIApiKey),
-        tableNames, prompt, chatHistory);
+    var plugin = new SqlListPlugin(_connectionString, tableNames);
+    var executionResult = await _botService.ExecutePromptAsync(plugin, new OpenAIClient(_openAIApiKey), prompt, chatHistory, null);
+
+    return View(executionResult);
+}
+```
+
+4. You can optionally use the Chart.js plugin to draw charts.
+```csharp
+[HttpPost("")]
+public async Task<IActionResult> Chart(string prompt, List<string> chatHistory, List<dynamic> rows)
+{
+    var plugin = new ChartJsPlugin();
+    var executionResult = await _botService.ExecutePromptAsync(plugin, new OpenAIClient(_openAIApiKey), prompt, chatHistory, rows);
 
     return View(executionResult);
 }

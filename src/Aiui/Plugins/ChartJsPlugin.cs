@@ -25,7 +25,7 @@ public sealed class ChartJsPlugin : IPlugin
         }
 
         result.Add(new ChatMessage(ChatRole.System,
-            "When instructed to draw a chart, generate the JavaScript needed for Chart.js with the above knowledge instead"));
+            "When instructed to draw a chart, generate the JavaScript needed for Chart.js using the variable data"));
 
         result.Add(new ChatMessage(ChatRole.System,
             "When creating the JavaScript code you must be brief and no explanation just write the JavaScript code itself and nothing else, this is very important"));

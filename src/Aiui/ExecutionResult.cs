@@ -8,7 +8,7 @@ public sealed class ExecutionResult
 
     public bool IsSuccessful { get; }
 
-    public string? AiResponse { get; }
+    public string? Response { get; }
 
     public object? Result { get; }
 
@@ -18,18 +18,18 @@ public sealed class ExecutionResult
         ChatHistory = chatHistory;
     }
 
-    internal ExecutionResult(List<Message> chatHistory, string? aiResponse)
+    internal ExecutionResult(List<Message> chatHistory, string? response)
     {
         IsSuccessful = false;
         ChatHistory = chatHistory;
-        AiResponse = aiResponse;
+        Response = response;
     }
 
-    internal ExecutionResult(List<Message> chatHistory, string? aiResponse, object? result)
+    internal ExecutionResult(List<Message> chatHistory, string? response, object? result)
     {
         IsSuccessful = true;
         ChatHistory = chatHistory;
-        AiResponse = aiResponse;
+        Response = response;
         Result = result;
     }
 }

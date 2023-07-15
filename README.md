@@ -3,7 +3,9 @@
 [![Build Status](https://ctyar.visualstudio.com/Aiui/_apis/build/status%2Fctyar.Aiui?branchName=main)](https://ctyar.visualstudio.com/Aiui/_build/latest?definitionId=8&branchName=main)
 [![Aiui](https://img.shields.io/nuget/v/Aiui.svg)](https://www.nuget.org/packages/Aiui/)
 
-## [Demo](https://aiui.azurewebsites.net/)
+[Demo video](https://github.com/ctyar/Aiui/assets/1432648/b97d3bd2-f5a4-4c08-a17c-80904411cb07)
+
+## [Live demo](https://aiui.azurewebsites.net/)
 
 This project aims to facilitate the creation of a new type of user interface for line of business applications.
 It will allow users to query data in their application using natural language and lower the barrier of accessing and analyzing data.

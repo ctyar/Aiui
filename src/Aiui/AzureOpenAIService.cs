@@ -5,20 +5,20 @@ using Azure.AI.OpenAI;
 
 namespace Aiui;
 
-internal sealed class OpenAIService
+internal sealed class AzureOpenAIService : IOpenAIService
 {
     private readonly OpenAIClient _openAIClient;
 
-    public OpenAIService(OpenAIClient openAIClient)
+    public AzureOpenAIService(OpenAIClient openAIClient)
     {
         _openAIClient = openAIClient;
     }
 
-    public async Task<string?> GetAsync(List<ChatMessage> pluginPrompts, List<Message> chatHistory)
+    public async Task<string?> GetAsync(List<Message> pluginPrompts, List<Message> chatHistory)
     {
         var chatCompletionsOptions = new ChatCompletionsOptions()
         {
-            Temperature = 0f
+            Temperature = 0f,
         };
 
         chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, "You are a software developer"));
@@ -27,21 +27,27 @@ internal sealed class OpenAIService
 
         foreach (var prompt in pluginPrompts)
         {
-            chatCompletionsOptions.Messages.Add(prompt);
+            chatCompletionsOptions.Messages.Add(GetChatMessage(prompt));
         }
 
         foreach (var chat in chatHistory.Where(item => item.Type == MessageType.User || item.Type == MessageType.System))
         {
-            var role = chat.Type switch
-            {
-                MessageType.User => ChatRole.User,
-                MessageType.System => ChatRole.System,
-            };
-            chatCompletionsOptions.Messages.Add(new ChatMessage(role, chat.Content));
+            chatCompletionsOptions.Messages.Add(GetChatMessage(chat));
         }
 
         var responseChatCompletions = await _openAIClient.GetChatCompletionsAsync("gpt-3.5-turbo", chatCompletionsOptions);
 
         return responseChatCompletions.Value.Choices[0].Message.Content;
+    }
+
+    private static ChatMessage GetChatMessage(Message message)
+    {
+        var role = message.Type switch
+        {
+            MessageType.User => ChatRole.User,
+            MessageType.System => ChatRole.System,
+        };
+
+        return new ChatMessage(role, message.Content);
     }
 }

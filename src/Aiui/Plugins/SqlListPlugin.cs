@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Azure.AI.OpenAI;
 using Microsoft.Extensions.Logging;
 
 namespace Aiui;
@@ -20,29 +19,43 @@ public sealed class SqlListPlugin : IPlugin
         _tableNames = tableNames;
     }
 
-    public Task<List<ChatMessage>?> BuildPromptAsync(string prompt, object? context, ILogger logger)
+    public Task<List<Message>?> BuildPromptAsync(string prompt, object? context, ILogger logger)
     {
         var sqlServerService = new SqlServerService(logger);
         var schema = sqlServerService.GetSchema(_connectionString, _tableNames);
 
         if (schema is null)
         {
-            return Task.FromResult((List<ChatMessage>?)null);
+            return Task.FromResult((List<Message>?)null);
         }
 
-        var result = new List<ChatMessage>();
+        var result = new List<Message>();
         foreach (var tableSchema in schema)
         {
-            result.Add(new ChatMessage(ChatRole.System, tableSchema));
+            result.Add(new Message
+            {
+                Type = MessageType.System,
+                Content = tableSchema
+            });
         }
 
-        result.Add(new ChatMessage(ChatRole.System,
-            "When instructed to list or show or create a report create a SQL query with the above knowledge instead"));
+        result.Add(new Message
+        {
+            Type = MessageType.System,
+            Content = "When instructed to list or show or create a report create a SQL query with the above knowledge instead"
+        });
 
-        result.Add(new ChatMessage(ChatRole.System,
-            "When creating a SQL query you must be brief and no explanation just write the SQL query itself and nothing else, this is very important"));
+        result.Add(new Message
+        {
+            Type = MessageType.System,
+            Content = "When creating a SQL query you must be brief and no explanation just write the SQL query itself and nothing else, this is very important"
+        });
 
-        result.Add(new ChatMessage(ChatRole.User, $"{prompt}, no explanation"));
+        result.Add(new Message
+        {
+            Type = MessageType.System,
+            Content = $"{prompt}, no explanation"
+        });
 
         return Task.FromResult(result)!;
     }

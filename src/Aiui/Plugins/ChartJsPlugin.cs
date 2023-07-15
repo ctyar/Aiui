@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Azure.AI.OpenAI;
 using Microsoft.Extensions.Logging;
 
 namespace Aiui;
 
 public sealed class ChartJsPlugin : IPlugin
 {
-    public Task<List<ChatMessage>?> BuildPromptAsync(string prompt, object? context, ILogger logger)
+    public Task<List<Message>?> BuildPromptAsync(string prompt, object? context, ILogger logger)
     {
-        var result = new List<ChatMessage>();
+        var result = new List<Message>();
 
         if (context != null)
         {
@@ -20,20 +19,37 @@ public sealed class ChartJsPlugin : IPlugin
                 var row = rows.First() as IDictionary<string, object>;
 
                 var columns = string.Join(",", row?.Keys ?? Array.Empty<string>());
-                result.Add(new ChatMessage(ChatRole.System, $"Imagine we have an object named data which is an array of objects with these properties: {columns}"));
+                result.Add(new Message
+                {
+                    Type = MessageType.System,
+                    Content = $"Imagine we have an object named data which is an array of objects with these properties: {columns}"
+                });
             }
         }
 
-        result.Add(new ChatMessage(ChatRole.System,
-            "We also have a HTML canvas with the id 'myChart'"));
+        result.Add(new Message
+        {
+            Type = MessageType.System,
+            Content = "We also have a HTML canvas with the id 'myChart'"
+        });
 
-        result.Add(new ChatMessage(ChatRole.System,
-            "When instructed to draw a chart, generate the JavaScript needed for Chart.js using the above information"));
+        result.Add(new Message
+        {
+            Type = MessageType.System,
+            Content = "When instructed to draw a chart, generate the JavaScript needed for Chart.js using the above information"
+        });
 
-        result.Add(new ChatMessage(ChatRole.System,
-            "When creating the JavaScript code you must be brief and no explanation just write the JavaScript code itself and nothing else, this is very important"));
+        result.Add(new Message
+        {
+            Type = MessageType.System,
+            Content = "When creating the JavaScript code you must be brief and no explanation just write the JavaScript code itself and nothing else, this is very important"
+        });
 
-        result.Add(new ChatMessage(ChatRole.User, $"{prompt}, no explanation"));
+        result.Add(new Message
+        {
+            Type = MessageType.System,
+            Content = $"{prompt}, no explanation"
+        });
 
         return Task.FromResult(result)!;
     }

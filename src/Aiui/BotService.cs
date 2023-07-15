@@ -16,10 +16,27 @@ public sealed class BotService
         _logger = logger;
     }
 
-    public async Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, OpenAIClient openAIClient, string prompt, List<Message> chatHistory, object? context)
+    public Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, string openAIApiKey, string prompt, List<Message> chatHistory, object? context)
+    {
+        ArgumentNullException.ThrowIfNull(openAIApiKey);
+
+        var betalgoOpenAIService = new BetalgoOpenAIService(openAIApiKey);
+
+        return ExecutePromptAsync(plugin, betalgoOpenAIService, prompt, chatHistory, context);
+    }
+
+    public Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, OpenAIClient openAIClient, string prompt, List<Message> chatHistory, object? context)
+    {
+        ArgumentNullException.ThrowIfNull(openAIClient);
+
+        var azureOpenAIService = new AzureOpenAIService(openAIClient);
+
+        return ExecutePromptAsync(plugin, azureOpenAIService, prompt, chatHistory, context);
+    }
+
+    private async Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, IOpenAIService openAIService, string prompt, List<Message> chatHistory, object? context)
     {
         ArgumentNullException.ThrowIfNull(plugin);
-        ArgumentNullException.ThrowIfNull(openAIClient);
         ArgumentNullException.ThrowIfNull(prompt);
         ArgumentNullException.ThrowIfNull(chatHistory);
 
@@ -32,7 +49,6 @@ public sealed class BotService
             return new ExecutionResult(chatHistory);
         }
 
-        var openAIService = new OpenAIService(openAIClient);
         var response = await openAIService.GetAsync(pluginPrompts, chatHistory);
 
         if (response is null)

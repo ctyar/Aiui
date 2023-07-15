@@ -12,7 +12,7 @@
 
   <PropertyGroup>
     <PackageId>Aiui</PackageId>
-    <PackageTags></PackageTags>
+    <PackageTags>OpenAI;ChatGPT;GPT-3;GPT-4;AI;chart;visualization;SQL</PackageTags>
     <Title>Aiui</Title>
     <Description>This project aims to facilitate the creation of a new type of user interface for line of business applications.
 It will allow users to query data in their application using natural language and lower the barrier of accessing and analyzing data.

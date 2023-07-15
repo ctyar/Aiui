@@ -5,11 +5,11 @@
 
 [Demo video](https://github.com/ctyar/Aiui/assets/1432648/b97d3bd2-f5a4-4c08-a17c-80904411cb07)
 
-## [Live demo](https://aiui.azurewebsites.net/)
-
 This project aims to facilitate the creation of a new type of user interface for line of business applications.
 It will allow users to query data in their application using natural language and lower the barrier of accessing and analyzing data.
 This is similar to how most applications let users export data as excel files to do further analysis on their own.
+
+## [Live demo: https://aiui.azurewebsites.net](https://aiui.azurewebsites.net/)
 
 ## Usage
 1. Install the [NuGet package](https://www.nuget.org/packages/Aiui)

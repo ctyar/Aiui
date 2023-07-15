@@ -25,7 +25,10 @@ public sealed class ChartJsPlugin : IPlugin
         }
 
         result.Add(new ChatMessage(ChatRole.System,
-            "When instructed to draw a chart, generate the JavaScript needed for Chart.js using the variable data"));
+            "We also have a HTML canvas with the id 'myChart'"));
+
+        result.Add(new ChatMessage(ChatRole.System,
+            "When instructed to draw a chart, generate the JavaScript needed for Chart.js using the above information"));
 
         result.Add(new ChatMessage(ChatRole.System,
             "When creating the JavaScript code you must be brief and no explanation just write the JavaScript code itself and nothing else, this is very important"));
@@ -46,6 +49,7 @@ public sealed class ChartJsPlugin : IPlugin
     {
         // Remove ``` anywhere in the query
         aiResponse = aiResponse.Replace("```js", "");
+        aiResponse = aiResponse.Replace("```javascript", "");
         aiResponse = aiResponse.Replace("```", "");
 
         return aiResponse;

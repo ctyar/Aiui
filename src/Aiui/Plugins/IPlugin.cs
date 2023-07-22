@@ -1,12 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Azure.AI.OpenAI;
 using Microsoft.Extensions.Logging;
 
 namespace Aiui;
 
 public interface IPlugin
 {
-    Task<List<Message>?> BuildPromptAsync(string prompt, object? context, ILogger logger);
+    FunctionDefinition GetFunctionDefinition();
+
+    Task<List<Message>?> BuildPromptAsync(object? context, ILogger logger);
 
     Task<object?> GetResultAsync(string aiResponse, ILogger logger);
 }

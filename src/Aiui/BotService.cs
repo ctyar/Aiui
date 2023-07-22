@@ -16,20 +16,20 @@ public sealed class BotService
         _logger = logger;
     }
 
-    public Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, string openAIApiKey, string prompt, List<Message> chatHistory, object? context)
+    /*internal Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, string openAIApiKey, string prompt, List<Message> chatHistory, object? context)
     {
         ArgumentNullException.ThrowIfNull(openAIApiKey);
 
         var betalgoOpenAIService = new BetalgoOpenAIService(openAIApiKey);
 
         return ExecutePromptAsync(plugin, betalgoOpenAIService, prompt, chatHistory, context);
-    }
+    }*/
 
     public Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, OpenAIClient openAIClient, string prompt, List<Message> chatHistory, object? context)
     {
         ArgumentNullException.ThrowIfNull(openAIClient);
 
-        var azureOpenAIService = new AzureOpenAIService(openAIClient);
+        var azureOpenAIService = new AzureOpenAIService(openAIClient, _logger);
 
         return ExecutePromptAsync(plugin, azureOpenAIService, prompt, chatHistory, context);
     }
@@ -42,43 +42,38 @@ public sealed class BotService
 
         var newHistory = GetNewHistory(prompt, chatHistory);
 
-        var pluginPrompts = await plugin.BuildPromptAsync(prompt, context, _logger);
-
-        if (pluginPrompts is null)
-        {
-            return new ExecutionResult(chatHistory);
-        }
-
-        var response = await openAIService.GetAsync(pluginPrompts, chatHistory);
+        var response = await openAIService.GetAsync(plugin, prompt, chatHistory, context);
 
         if (response is null)
         {
             return new ExecutionResult(newHistory);
         }
 
-        var data = await plugin.GetResultAsync(response, _logger);
+        if (response.Type == ResultType.Message)
+        {
+            newHistory.Add(new Message
+            {
+                Type = MessageType.AI,
+                Content = response.Value
+            });
+
+            return new ExecutionResult(newHistory, response.Value);
+        }
+
+        var data = await plugin.GetResultAsync(response.PluginArguments!, _logger);
 
         if (data is null)
         {
-            // Probably just a normal command response
-            newHistory.Add(new Message
-            {
-                Type = MessageType.System,
-                Content = response
-            });
-
-            return new ExecutionResult(newHistory, response);
+            return new ExecutionResult(newHistory, response.Value + response.PluginArguments);
         }
-        else
+
+        newHistory.Add(new Message
         {
-            newHistory.Add(new Message
-            {
-                Type = MessageType.Info,
-                Content = "Done"
-            });
-        }
+            Type = MessageType.Aiui,
+            Content = "Done"
+        });
 
-        return new ExecutionResult(newHistory, response, data);
+        return new ExecutionResult(newHistory, response.Value + response.PluginArguments, data);
     }
 
     private static List<Message> GetNewHistory(string prompt, List<Message> chatHistory)

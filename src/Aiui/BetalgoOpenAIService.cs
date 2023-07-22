@@ -1,15 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using OpenAI;
-using OpenAI.Managers;
-using OpenAI.ObjectModels;
-using OpenAI.ObjectModels.RequestModels;
-using ChatMessage = OpenAI.ObjectModels.RequestModels.ChatMessage;
+﻿namespace Aiui;
 
-namespace Aiui;
-
-internal sealed class BetalgoOpenAIService : IOpenAIService
+/*internal sealed class BetalgoOpenAIService : IOpenAIService
 {
     private readonly string _apiKey;
 
@@ -45,6 +36,12 @@ internal sealed class BetalgoOpenAIService : IOpenAIService
             chatCompletionCreateRequest.Messages.Add(GetChatMessage(chat));
         }
 
+        // TODO: Implement
+        *//*chatCompletionCreateRequest.Functions.Add(new FunctionDefinition
+        {
+            Description
+        })*//*
+
         var completionResult = await openAiService.ChatCompletion.CreateCompletion(chatCompletionCreateRequest);
 
         return completionResult.Choices[0].Message.Content;
@@ -58,4 +55,4 @@ internal sealed class BetalgoOpenAIService : IOpenAIService
             MessageType.System => ChatMessage.FromSystem(message.Content),
         };
     }
-}
+}*/

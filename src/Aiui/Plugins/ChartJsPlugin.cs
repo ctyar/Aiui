@@ -2,13 +2,39 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.AI.OpenAI;
 using Microsoft.Extensions.Logging;
 
 namespace Aiui;
 
 public sealed class ChartJsPlugin : IPlugin
 {
-    public Task<List<Message>?> BuildPromptAsync(string prompt, object? context, ILogger logger)
+    public FunctionDefinition GetFunctionDefinition()
+    {
+        return new FunctionDefinition
+        {
+            Name = nameof(ChartJsPlugin),
+            Description = "A function that receives the JavaScript code needed for Chart.js as string and draws the chart",
+            Parameters = BinaryData.FromObjectAsJson(new
+            {
+                type = "object",
+                properties = new Dictionary<string, object>()
+                {
+                    {
+                        nameof(Arguments.ChartJsCode), new
+                        {
+                            type = "string",
+                            description = "The JavaScript code needed for Chart.js as string to draw a chart in an HTML canvas element " +
+                                " with the id 'myChart'"
+                        }
+                    }
+                },
+                required = new[] { nameof(Arguments.ChartJsCode) }
+            })
+        };
+    }
+
+    public Task<List<Message>?> BuildPromptAsync(object? context, ILogger logger)
     {
         var result = new List<Message>();
 
@@ -21,53 +47,42 @@ public sealed class ChartJsPlugin : IPlugin
                 var columns = string.Join(",", row?.Keys ?? Array.Empty<string>());
                 result.Add(new Message
                 {
-                    Type = MessageType.System,
+                    Type = MessageType.AI,
                     Content = $"Imagine we have an object named data which is an array of objects with these properties: {columns}"
                 });
             }
         }
-
-        result.Add(new Message
-        {
-            Type = MessageType.System,
-            Content = "We also have a HTML canvas with the id 'myChart'"
-        });
-
-        result.Add(new Message
-        {
-            Type = MessageType.System,
-            Content = "When instructed to draw a chart, generate the JavaScript needed for Chart.js using the above information"
-        });
-
-        result.Add(new Message
-        {
-            Type = MessageType.System,
-            Content = "When creating the JavaScript code you must be brief and no explanation just write the JavaScript code itself and nothing else, this is very important"
-        });
-
-        result.Add(new Message
-        {
-            Type = MessageType.System,
-            Content = $"{prompt}, no explanation"
-        });
 
         return Task.FromResult(result)!;
     }
 
     public Task<object?> GetResultAsync(string aiResponse, ILogger logger)
     {
-        var jsCode = Clean(aiResponse);
+        var jsCode = GetJsQuery(aiResponse);
+
+        if (jsCode is null)
+        {
+            return Task.FromResult((object?)null);
+        }
 
         return Task.FromResult((object?)jsCode);
     }
 
-    private static string Clean(string aiResponse)
+    private static string? GetJsQuery(string aiResponse)
     {
-        // Remove ``` anywhere in the query
-        aiResponse = aiResponse.Replace("```js", "");
-        aiResponse = aiResponse.Replace("```javascript", "");
-        aiResponse = aiResponse.Replace("```", "");
+        // For some reason the response is not a valid JSON
+        var index = aiResponse.IndexOf("`");
+        aiResponse = aiResponse.Remove(0, index + 1);
+
+        index = aiResponse.IndexOf("`");
+        aiResponse = aiResponse.Remove(index);
+
 
         return aiResponse;
+    }
+
+    private class Arguments
+    {
+        public string? ChartJsCode { get; set; }
     }
 }

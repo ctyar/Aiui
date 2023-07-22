@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Azure.AI.OpenAI;
 using Microsoft.Extensions.Logging;
 
 namespace Aiui;
@@ -19,7 +21,25 @@ public sealed class SqlListPlugin : IPlugin
         _tableNames = tableNames;
     }
 
-    public Task<List<Message>?> BuildPromptAsync(string prompt, object? context, ILogger logger)
+    public FunctionDefinition GetFunctionDefinition()
+    {
+        return new FunctionDefinition
+        {
+            Name = nameof(SqlListPlugin),
+            Description = "A function that receives Microsoft SQL Server SQL query executes the query and lists or the result and puts the result in the context",
+            Parameters = BinaryData.FromObjectAsJson(new
+            {
+                type = "object",
+                properties = new Dictionary<string, object>()
+                {
+                    { nameof(Arguments.SqlQuery), new { type = "string", description = "The Microsoft SQL Server SQL query" } }
+                },
+                required = new[] { nameof(Arguments.SqlQuery) }
+            })
+        };
+    }
+
+    public Task<List<Message>?> BuildPromptAsync(object? _, ILogger logger)
     {
         var sqlServerService = new SqlServerService(logger);
         var schema = sqlServerService.GetSchema(_connectionString, _tableNames);
@@ -34,35 +54,22 @@ public sealed class SqlListPlugin : IPlugin
         {
             result.Add(new Message
             {
-                Type = MessageType.System,
+                Type = MessageType.AI,
                 Content = tableSchema
             });
         }
-
-        result.Add(new Message
-        {
-            Type = MessageType.System,
-            Content = "When instructed to list or show or create a report create a SQL query with the above knowledge instead"
-        });
-
-        result.Add(new Message
-        {
-            Type = MessageType.System,
-            Content = "When creating a SQL query you must be brief and no explanation just write the SQL query itself and nothing else, this is very important"
-        });
-
-        result.Add(new Message
-        {
-            Type = MessageType.System,
-            Content = $"{prompt}, no explanation"
-        });
 
         return Task.FromResult(result)!;
     }
 
     public async Task<object?> GetResultAsync(string aiResponse, ILogger logger)
     {
-        var sqlQuery = CleanQuery(aiResponse);
+        var sqlQuery = GetSqlQuery(aiResponse);
+
+        if (sqlQuery is null)
+        {
+            return null;
+        }
 
         var sqlServerService = new SqlServerService(logger);
         var data = await sqlServerService.QueryAsync(_connectionString, sqlQuery);
@@ -70,20 +77,15 @@ public sealed class SqlListPlugin : IPlugin
         return data;
     }
 
-    private static string CleanQuery(string query)
+    private static string? GetSqlQuery(string aiResponse)
     {
-        // Remove ``` anywhere in the query
-        query = query.Replace("```sql", "");
-        query = query.Replace("```", "");
+        var arguments = JsonSerializer.Deserialize<Arguments>(aiResponse);
 
-        // Remove everything before the first select
-        var index = query.IndexOf("select", 0, StringComparison.OrdinalIgnoreCase);
+        return arguments?.SqlQuery;
+    }
 
-        if (index <= 1)
-        {
-            return query;
-        }
-
-        return query.Substring(index);
+    private class Arguments
+    {
+        public string? SqlQuery { get; set; }
     }
 }

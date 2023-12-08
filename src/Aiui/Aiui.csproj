@@ -28,7 +28,7 @@ This is similar to how most applications let users export data as excel files to
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" Condition="'$(TargetFramework)'=='net6.0'" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" Condition="'$(TargetFramework)'=='net7.0'" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.4" Condition="'$(TargetFramework)'=='net6.0'" />
-    <PackageReference Include="Azure.AI.OpenAI" Version="1.0.0-beta.8" />
+    <PackageReference Include="Azure.AI.OpenAI" Version="1.0.0-beta.11" />
     <PackageReference Include="Dapper" Version="2.1.24" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" />
     <PackageReference Include="DatabaseSchemaReader" Version="2.10.0" />

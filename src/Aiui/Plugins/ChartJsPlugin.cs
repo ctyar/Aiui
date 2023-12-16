@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Azure.AI.OpenAI;
 using Microsoft.Extensions.Logging;
@@ -70,15 +71,11 @@ public sealed class ChartJsPlugin : IPlugin
 
     private static string? GetJsQuery(string aiResponse)
     {
-        // For some reason the response is not a valid JSON
-        var index = aiResponse.IndexOf("`");
-        aiResponse = aiResponse.Remove(0, index + 1);
+        aiResponse = aiResponse.Replace("\n", "");
 
-        index = aiResponse.IndexOf("`");
-        aiResponse = aiResponse.Remove(index);
+        var arguments = JsonSerializer.Deserialize<Arguments>(aiResponse);
 
-
-        return aiResponse;
+        return arguments?.ChartJsCode;
     }
 
     private class Arguments

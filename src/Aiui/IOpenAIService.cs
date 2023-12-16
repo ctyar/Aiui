@@ -5,5 +5,5 @@ namespace Aiui;
 
 internal interface IOpenAIService
 {
-    Task<Result?> GetAsync(IPlugin plugin, string prompt, List<Message> chatHistory, object? context);
+    Task<Result?> GetAsync(IEnumerable<IPlugin> plugins, string prompt, List<Message> chatHistory, object? context);
 }

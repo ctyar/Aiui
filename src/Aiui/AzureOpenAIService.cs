@@ -19,7 +19,7 @@ internal sealed class AzureOpenAIService : IOpenAIService
         _logger = logger;
     }
 
-    public async Task<Result?> GetAsync(IPlugin plugin, string prompt, List<Message> chatHistory, object? context)
+    public async Task<Result?> GetAsync(IEnumerable<IPlugin> plugins, string prompt, List<Message> chatHistory, object? context)
     {
         var chatCompletionsOptions = new ChatCompletionsOptions()
         {
@@ -28,20 +28,21 @@ internal sealed class AzureOpenAIService : IOpenAIService
         };
 
         chatCompletionsOptions.Messages.Add(new ChatRequestSystemMessage("You are a software developer"));
-
         chatCompletionsOptions.Messages.Add(new ChatRequestSystemMessage("Do not give comment or explanation"));
 
-        chatCompletionsOptions.Functions.Add(plugin.GetFunctionDefinition());
-
-        var pluginPrompts = await plugin.BuildPromptAsync(context, _logger);
-
-        if (pluginPrompts is null)
+        foreach (var plugin in plugins)
         {
-            return null;
-        }
-        foreach (var pluginPrompt in pluginPrompts)
-        {
-            chatCompletionsOptions.Messages.Add(GetChatMessage(pluginPrompt));
+            chatCompletionsOptions.Functions.Add(plugin.GetFunctionDefinition());
+
+            var pluginPrompts = await plugin.BuildPromptAsync(context, _logger);
+            if (pluginPrompts is null)
+            {
+                continue;
+            }
+            foreach (var pluginPrompt in pluginPrompts)
+            {
+                chatCompletionsOptions.Messages.Add(GetChatMessage(pluginPrompt));
+            }
         }
 
         foreach (var chat in chatHistory.Where(item => item.Type == MessageType.User || item.Type == MessageType.AI))

@@ -16,26 +16,26 @@ public sealed class BotService
         _logger = logger;
     }
 
-    public Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, OpenAIClient openAIClient, string prompt, List<Message> chatHistory,
+    public Task<ExecutionResult> ExecutePromptAsync(IEnumerable<IPlugin> plugins, OpenAIClient openAIClient, string prompt, List<Message> chatHistory,
         object? context)
     {
         ArgumentNullException.ThrowIfNull(openAIClient);
 
         var azureOpenAIService = new AzureOpenAIService(openAIClient, _logger);
 
-        return ExecutePromptAsync(plugin, azureOpenAIService, prompt, chatHistory, context);
+        return ExecutePromptAsync(plugins, azureOpenAIService, prompt, chatHistory, context);
     }
 
-    private async Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, IOpenAIService openAIService, string prompt,
+    private async Task<ExecutionResult> ExecutePromptAsync(IEnumerable<IPlugin> plugins, IOpenAIService openAIService, string prompt,
         List<Message> chatHistory, object? context)
     {
-        ArgumentNullException.ThrowIfNull(plugin);
+        ArgumentNullException.ThrowIfNull(plugins);
         ArgumentNullException.ThrowIfNull(prompt);
         ArgumentNullException.ThrowIfNull(chatHistory);
 
         var newHistory = GetNewHistory(prompt, chatHistory);
 
-        var response = await openAIService.GetAsync(plugin, prompt, chatHistory, context);
+        var response = await openAIService.GetAsync(plugins, prompt, chatHistory, context);
 
         if (response is null)
         {
@@ -51,6 +51,13 @@ public sealed class BotService
             });
 
             return new ExecutionResult(newHistory, response.Value);
+        }
+
+        var plugin = plugins.FirstOrDefault(p => p.GetFunctionDefinition().Name == response.Value);
+
+        if (plugin is null)
+        {
+            return new ExecutionResult(newHistory, response.Value + response.PluginArguments);
         }
 
         var data = await plugin.GetResultAsync(response.PluginArguments!, _logger);

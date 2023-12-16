@@ -14,7 +14,7 @@ public sealed class ChartJsPlugin : IPlugin
         return new FunctionDefinition
         {
             Name = nameof(ChartJsPlugin),
-            Description = "A function that receives the JavaScript code needed for Chart.js as string and draws the chart",
+            Description = "A function that receives the JavaScript code needed for Chart.js as string and draws the chart for the data in memory",
             Parameters = BinaryData.FromObjectAsJson(new
             {
                 type = "object",

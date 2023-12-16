@@ -26,7 +26,7 @@ public sealed class SqlListPlugin : IPlugin
         return new FunctionDefinition
         {
             Name = nameof(SqlListPlugin),
-            Description = "A function that receives Microsoft SQL Server SQL query executes the query and lists or the result and puts the result in the context",
+            Description = "A function that receives Microsoft SQL Server SQL query executes the query and puts the result in memory",
             Parameters = BinaryData.FromObjectAsJson(new
             {
                 type = "object",

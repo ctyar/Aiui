@@ -16,16 +16,8 @@ public sealed class BotService
         _logger = logger;
     }
 
-    /*internal Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, string openAIApiKey, string prompt, List<Message> chatHistory, object? context)
-    {
-        ArgumentNullException.ThrowIfNull(openAIApiKey);
-
-        var betalgoOpenAIService = new BetalgoOpenAIService(openAIApiKey);
-
-        return ExecutePromptAsync(plugin, betalgoOpenAIService, prompt, chatHistory, context);
-    }*/
-
-    public Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, OpenAIClient openAIClient, string prompt, List<Message> chatHistory, object? context)
+    public Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, OpenAIClient openAIClient, string prompt, List<Message> chatHistory,
+        object? context)
     {
         ArgumentNullException.ThrowIfNull(openAIClient);
 
@@ -34,7 +26,8 @@ public sealed class BotService
         return ExecutePromptAsync(plugin, azureOpenAIService, prompt, chatHistory, context);
     }
 
-    private async Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, IOpenAIService openAIService, string prompt, List<Message> chatHistory, object? context)
+    private async Task<ExecutionResult> ExecutePromptAsync(IPlugin plugin, IOpenAIService openAIService, string prompt,
+        List<Message> chatHistory, object? context)
     {
         ArgumentNullException.ThrowIfNull(plugin);
         ArgumentNullException.ThrowIfNull(prompt);

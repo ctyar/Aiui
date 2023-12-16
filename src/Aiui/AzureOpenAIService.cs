@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,12 +23,13 @@ internal sealed class AzureOpenAIService : IOpenAIService
     {
         var chatCompletionsOptions = new ChatCompletionsOptions()
         {
+            DeploymentName = "gpt-3.5-turbo",
             Temperature = 0f,
         };
 
-        chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, "You are a software developer"));
+        chatCompletionsOptions.Messages.Add(new ChatRequestSystemMessage("You are a software developer"));
 
-        chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, "Do not give comment or explanation"));
+        chatCompletionsOptions.Messages.Add(new ChatRequestSystemMessage("Do not give comment or explanation"));
 
         chatCompletionsOptions.Functions.Add(plugin.GetFunctionDefinition());
 
@@ -47,31 +49,38 @@ internal sealed class AzureOpenAIService : IOpenAIService
             chatCompletionsOptions.Messages.Add(GetChatMessage(chat));
         }
 
-        chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, prompt));
+        chatCompletionsOptions.Messages.Add(new ChatRequestUserMessage(prompt));
 
-
-        var responseChatCompletions = await _openAIClient.GetChatCompletionsAsync("gpt-3.5-turbo", chatCompletionsOptions);
-
+        var responseChatCompletions = await _openAIClient.GetChatCompletionsAsync(chatCompletionsOptions);
 
         var chatChoice = responseChatCompletions.Value.Choices[0];
 
         if (chatChoice.FinishReason == CompletionsFinishReason.FunctionCall)
         {
+            chatCompletionsOptions.Messages.Add(new ChatRequestAssistantMessage("SQL query successfully executed. The result is in memory now.")
+            {
+                Name = chatChoice.Message.FunctionCall.Name
+            });
+            var responseChatCompletions2 = await _openAIClient.GetChatCompletionsAsync(chatCompletionsOptions);
+
             return new Result(ResultType.PluginExecution, chatChoice.Message.FunctionCall.Name, chatChoice.Message.FunctionCall.Arguments);
         }
 
         return new Result(ResultType.Message, chatChoice.Message.Content);
     }
 
-    private static ChatMessage GetChatMessage(Message message)
+    private static ChatRequestMessage GetChatMessage(Message message)
     {
-        var role = message.Type switch
+        if (message.Type == MessageType.User)
         {
-            MessageType.User => ChatRole.User,
-            MessageType.AI => ChatRole.System,
-        };
+            return new ChatRequestUserMessage(message.Content);
+        }
+        else if (message.Type == MessageType.AI)
+        {
+            return new ChatRequestSystemMessage(message.Content);
+        }
 
-        return new ChatMessage(role, message.Content);
+        throw new NotSupportedException();
     }
 }
 

@@ -31,6 +31,7 @@ internal sealed class SqlServerService
             "Imagine we have a Microsoft SQL Server database with these tables."
         };
 
+        // TODO: Test valid SQL instead of this
         foreach (var table in tablesSchema)
         {
             result.Add($"A table called [{table.Name}] with {table.Columns.Count} columns");

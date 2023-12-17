@@ -73,9 +73,21 @@ public sealed class ChartJsPlugin : IPlugin
     {
         aiResponse = aiResponse.Replace("\n", "");
 
-        var arguments = JsonSerializer.Deserialize<Arguments>(aiResponse);
+        var index = aiResponse.IndexOf("`");
+        if (index == -1)
+        {
+            var arguments = JsonSerializer.Deserialize<Arguments>(aiResponse);
 
-        return arguments?.ChartJsCode;
+            return arguments?.ChartJsCode;
+        }
+
+        // For some reason sometimes the response is not a valid JSON
+        aiResponse = aiResponse.Remove(0, index + 1);
+
+        index = aiResponse.IndexOf("`");
+        aiResponse = aiResponse.Remove(index);
+
+        return aiResponse;
     }
 
     private class Arguments

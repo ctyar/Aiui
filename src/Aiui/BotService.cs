@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Azure.AI.OpenAI;
 using Microsoft.Extensions.Logging;
 
 namespace Aiui;
@@ -10,32 +9,30 @@ namespace Aiui;
 public sealed class BotService
 {
     private readonly ILogger<BotService> _logger;
+    private readonly AiuiOptions _options;
 
-    public BotService(ILogger<BotService> logger)
+    public BotService(ILogger<BotService> logger, AiuiOptions options)
     {
         _logger = logger;
+        _options = options;
     }
 
-    public Task<ExecutionResult> ExecutePromptAsync(IEnumerable<IPlugin> plugins, OpenAIClient openAIClient, string prompt, List<Message> chatHistory,
-        object? context)
+    public Task<ExecutionResult> ExecutePromptAsync(string prompt, List<Message> chatHistory, object? context)
     {
-        ArgumentNullException.ThrowIfNull(openAIClient);
-
-        var azureOpenAIService = new AzureOpenAIService(openAIClient, _logger);
-
-        return ExecutePromptAsync(plugins, azureOpenAIService, prompt, chatHistory, context);
-    }
-
-    private async Task<ExecutionResult> ExecutePromptAsync(IEnumerable<IPlugin> plugins, IOpenAIService openAIService, string prompt,
-        List<Message> chatHistory, object? context)
-    {
-        ArgumentNullException.ThrowIfNull(plugins);
         ArgumentNullException.ThrowIfNull(prompt);
         ArgumentNullException.ThrowIfNull(chatHistory);
 
+        var azureOpenAIService = new AzureOpenAIService(_options.Client, _options.Plugins, _logger);
+
+        return ExecutePromptAsync(azureOpenAIService, prompt, chatHistory, context);
+    }
+
+    private async Task<ExecutionResult> ExecutePromptAsync(IOpenAIService openAIService, string prompt, List<Message> chatHistory,
+        object? context)
+    {
         var newHistory = GetNewHistory(prompt, chatHistory);
 
-        var response = await openAIService.GetAsync(plugins, prompt, chatHistory, context);
+        var response = await openAIService.GetAsync(prompt, chatHistory, context);
 
         if (response is null)
         {
@@ -53,7 +50,7 @@ public sealed class BotService
             return new ExecutionResult(newHistory, response.Value);
         }
 
-        var plugin = plugins.FirstOrDefault(p => p.GetFunctionDefinition().Name == response.Value);
+        var plugin = _options.Plugins.FirstOrDefault(p => p.GetFunctionDefinition().Name == response.Value);
 
         if (plugin is null)
         {

@@ -21,18 +21,23 @@ using Aiui;
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAiui();
+builder.Services.AddAiui(new AiuiOptions
+{
+    Client = new OpenAIClient(builder.Configuration.GetValue<string>("OpenApiKey")),
+    Plugins =
+    [
+        new SqlListPlugin(builder.Configuration.GetConnectionString("SqlServer")!, ["Categories", "Products"]
+        new ChartJsPlugin(),
+    ]
+});
 ```
 
-3. Pass your SQL Server connection string and list of tables you want to expose, with user's current prompt and chat history to the `BotService`.
+3. Pass user's prompt and chat history to the `BotService`.
 ```csharp
 [HttpPost("")]
 public async Task<IActionResult> Index(string prompt, List<string> chatHistory)
 {
-    var tableNames = new List<string> { "Products", "Categories" };
-
-    var plugin = new SqlListPlugin(_connectionString, tableNames);
-    var executionResult = await _botService.ExecutePromptAsync(plugin, new OpenAIClient(_openAIApiKey), prompt, chatHistory, null);
+    var executionResult = await _botService.ExecutePromptAsync(prompt, chatHistory, null);
 
     return View(executionResult);
 }
@@ -43,8 +48,7 @@ public async Task<IActionResult> Index(string prompt, List<string> chatHistory)
 [HttpPost("")]
 public async Task<IActionResult> Chart(string prompt, List<string> chatHistory, List<dynamic> rows)
 {
-    var plugin = new ChartJsPlugin();
-    var executionResult = await _botService.ExecutePromptAsync(plugin, new OpenAIClient(_openAIApiKey), prompt, chatHistory, rows);
+    var executionResult = await _botService.ExecutePromptAsync(prompt, chatHistory, rows);
 
     return View(executionResult);
 }

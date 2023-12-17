@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,15 +12,17 @@ namespace Aiui;
 internal sealed class AzureOpenAIService : IOpenAIService
 {
     private readonly OpenAIClient _openAIClient;
+    private readonly Collection<IPlugin> _plugins;
     private readonly ILogger _logger;
 
-    public AzureOpenAIService(OpenAIClient openAIClient, ILogger logger)
+    public AzureOpenAIService(OpenAIClient openAIClient, Collection<IPlugin> plugins, ILogger logger)
     {
         _openAIClient = openAIClient;
+        _plugins = plugins;
         _logger = logger;
     }
 
-    public async Task<Result?> GetAsync(IEnumerable<IPlugin> plugins, string prompt, List<Message> chatHistory, object? context)
+    public async Task<Result?> GetAsync(string prompt, List<Message> chatHistory, object? context)
     {
         var chatCompletionsOptions = new ChatCompletionsOptions()
         {
@@ -30,7 +33,7 @@ internal sealed class AzureOpenAIService : IOpenAIService
         chatCompletionsOptions.Messages.Add(new ChatRequestSystemMessage("You are a software developer"));
         chatCompletionsOptions.Messages.Add(new ChatRequestSystemMessage("Do not give comment or explanation"));
 
-        foreach (var plugin in plugins)
+        foreach (var plugin in _plugins)
         {
             chatCompletionsOptions.Functions.Add(plugin.GetFunctionDefinition());
 
@@ -58,10 +61,12 @@ internal sealed class AzureOpenAIService : IOpenAIService
 
         if (chatChoice.FinishReason == CompletionsFinishReason.FunctionCall)
         {
-            chatCompletionsOptions.Messages.Add(new ChatRequestAssistantMessage("SQL query successfully executed. The result is in memory now.")
-            {
-                Name = chatChoice.Message.FunctionCall.Name
-            });
+            // TODO: move this to each plugin
+            chatCompletionsOptions.Messages.Add(
+                new ChatRequestAssistantMessage("SQL query successfully executed. The result is in memory now.")
+                {
+                    Name = chatChoice.Message.FunctionCall.Name
+                });
             var responseChatCompletions2 = await _openAIClient.GetChatCompletionsAsync(chatCompletionsOptions);
 
             return new Result(ResultType.PluginExecution, chatChoice.Message.FunctionCall.Name, chatChoice.Message.FunctionCall.Arguments);

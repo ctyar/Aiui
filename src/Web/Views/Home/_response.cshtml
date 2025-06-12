@@ -1,0 +1,13 @@
+﻿@using ColorCode;
+
+@model (string? Response, ILanguage Language)
+
+@if (Model.Response is not null)
+{
+    <div class="p-2">
+        <button type="button" class="collapsible">Query</button>
+        <div class="content" style="padding: 0">
+            @Html.Raw(new HtmlFormatter().GetHtmlString(Model.Response, Model.Language))
+        </div>
+    </div>
+}

@@ -1,0 +1,28 @@
+﻿@model object?
+
+@if (Model is List<dynamic> rows)
+{
+    <div class="p-2">
+        <table data-toggle="table" data-search="true" data-show-columns="true" data-pagination="true">
+            <thead>
+                <tr>
+                    @foreach (var keyValuePair in rows.First())
+                    {
+                        <th data-sortable="true">@keyValuePair.Key</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in rows)
+                {
+                    <tr>
+                        @foreach (var keyValuePair in row)
+                        {
+                            <td>@keyValuePair.Value</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

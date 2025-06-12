@@ -1,0 +1,25 @@
+﻿@model bool
+
+@if (Model)
+{
+    <nav id="navbar-example2" class="navbar navbar-light px-3">
+        <ul class="nav nav-pills mx-auto">
+            <li class="nav-item">
+                <a class="nav-link
+                    @((string?)Html.ViewContext.RouteData.Values["action"] == "Index" ||
+                      (string?)Html.ViewContext.RouteData.Values["action"] == "GetList" ||
+                      (string?)Html.ViewContext.RouteData.Values["action"] == "PostList"
+                      ? "active" : string.Empty)" aria-current="page"
+                   asp-controller="Home" asp-action="GetList">1. List</a>
+            </li>
+            <li class="nav-item"><span class="nav-link"> > </span></li>
+            <li class="nav-item">
+                <a class="nav-link
+                    @((string?)Html.ViewContext.RouteData.Values["action"] == "GetGraph" ||
+                      (string?)Html.ViewContext.RouteData.Values["action"] == "PostGraph"
+                      ? "active" : string.Empty)"
+                   asp-controller="Home" asp-action="GetGraph">2. Graph</a>
+            </li>
+        </ul>
+    </nav>
+}

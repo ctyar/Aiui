@@ -1,0 +1,11 @@
+﻿@model List<Aiui.Message>
+
+@if (Model.Any())
+{
+    <div class="chat-container">
+        @foreach (var message in Model)
+        {
+            <p class="@(message.Type == Aiui.MessageType.User ? "user-message" : "system-message")">@message.Content</p>
+        }
+    </div>
+}

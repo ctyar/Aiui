@@ -1,0 +1,76 @@
+﻿<div class="p-2">
+    <div class="card">
+        <div class="card-header">
+            What is this project?
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                This project aims to facilitate the creation of a new type of user interface for line of business applications.
+                It will allow users to query data in their application using natural language and lower the barrier of accessing and analyzing data.
+                This is similar to how most applications let users export data as excel files to do further analysis on their own.
+            </p>
+        </div>
+    </div>
+</div>
+<div class="p-2">
+    <div class="card">
+        <div class="card-header">
+            What is the database schema?
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                This sample is using The <a href="https://github.com/microsoft/sql-server-samples/tree/master/samples/databases/northwind-pubs">Northwind database</a>.
+                It contains sales data for a fictitious company called “Northwind Traders” which imports and exports specialty foods from around the world.
+                You can check the overview of the schema <a href="~/img/schema.png">here</a>.
+            </p>
+        </div>
+    </div>
+</div>
+<div class="p-2">
+    <div class="card">
+        <div class="card-header">
+            Has the AI been trained specifically on this database?
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                No, the AI will receive information on the database schema at runtime
+            </p>
+        </div>
+    </div>
+</div>
+<div class="p-2">
+    <div class="card">
+        <div class="card-header">
+            Will the AI be able to access the data in the database?
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                No, The AI will generate SQL queries which the library will execute.
+            </p>
+        </div>
+    </div>
+</div>
+<div class="p-2">
+    <div class="card">
+        <div class="card-header">
+            What if the user tries to access or execute malicious queries?
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                You should use a read-only database user with minimum access to tables that the user needs.
+            </p>
+        </div>
+    </div>
+</div>
+<div class="p-2">
+    <div class="card">
+        <div class="card-header">
+            What if the user tries to get information about other users?
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                You should not share conversations between users.
+            </p>
+        </div>
+    </div>
+</div>

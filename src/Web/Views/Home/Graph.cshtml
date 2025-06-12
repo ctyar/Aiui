@@ -1,0 +1,44 @@
+﻿@using ColorCode;
+@using System.Text.Json;
+
+@model IndexViewModel
+
+<div class="d-grid gap-3">
+    <partial name="_chatHistory.cshtml" model="Model.ChatHistory" />
+
+    <partial name="_steps.cshtml" model="Model.Result is not null || Model.Context is not null" />
+
+    <div class="p-2">
+        <form method="post" asp-action="Graph">
+            @for (var i = 0; i < Model.ChatHistory.Count; i++)
+            {
+                <input type="hidden" name="chatHistory[@i].type" value="@Model.ChatHistory[i].Type" />
+                <input type="hidden" name="chatHistory[@i].content" value="@Model.ChatHistory[i].Content" />
+            }
+
+            <div class="mb-3">
+                <label for="prompt" class="form-label"></label>
+                <textarea class="form-control" id="prompt" name="prompt" rows="3">@(Model.IsFirst ? "Draw a bar chart for product name and their units in stock" : "")</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Graph</button>
+        </form>
+    </div>
+
+    <partial name="_response.cshtml" model="(Model.Response, Languages.JavaScript)" />
+
+    <div>
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        var data = JSON.parse('@Html.Raw(JsonSerializer.Serialize(Model.Context))');
+        @Html.Raw(Model.Result)
+    </script>
+
+    <partial name="_table.cshtml" model="Model.Context" />
+
+    <partial name="_faq.cshtml" />
+</div>

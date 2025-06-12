@@ -26,7 +26,7 @@ internal sealed class AzureOpenAIService : IOpenAIService
     {
         var chatCompletionsOptions = new ChatCompletionsOptions()
         {
-            DeploymentName = "gpt-3.5-turbo",
+            DeploymentName = "gpt-4.1",
             Temperature = 0f,
         };
 

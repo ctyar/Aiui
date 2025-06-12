@@ -115,7 +115,8 @@ public class Program
         builder.Services.AddOpenTelemetry()
             .WithTracing(b =>
             {
-                b.AddHoneycomb(honeycombOptions)
+                // TODO: Enable or remove this
+                b//.AddHoneycomb(honeycombOptions)
                     .AddAspNetCoreInstrumentation()
                     .AddSqlClientInstrumentation()
                     .AddHttpClientInstrumentation();
@@ -125,7 +126,8 @@ public class Program
 
         builder.Services.AddOpenTelemetry().WithMetrics(b =>
             {
-                b.AddHoneycomb(honeycombOptions)
+                // TODO: Enable or remove this
+                b//.AddHoneycomb(honeycombOptions)
                     .AddAspNetCoreInstrumentation();
             });
 

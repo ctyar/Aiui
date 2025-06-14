@@ -2,7 +2,6 @@
 @using System.ComponentModel
 @inject IChatClient ChatClient
 @inject NavigationManager Nav
-@inject SemanticSearch Search
 @implements IDisposable
 
 <PageTitle>Chat</PageTitle>
@@ -106,9 +105,10 @@
         [Description("If possible, specify the filename to search that file only. If not provided or empty, the search includes all files.")] string? filenameFilter = null)
     {
         await InvokeAsync(StateHasChanged);
-        var results = await Search.SearchAsync(searchPhrase, filenameFilter, maxResults: 5);
+        /*var results = await Search.SearchAsync(searchPhrase, filenameFilter, maxResults: 5);
         return results.Select(result =>
-            $"<result filename=\"{result.DocumentId}\" page_number=\"{result.PageNumber}\">{result.Text}</result>");
+            $"<result filename=\"{result.DocumentId}\" page_number=\"{result.PageNumber}\">{result.Text}</result>");*/
+        return [];
     }
 
     public void Dispose()

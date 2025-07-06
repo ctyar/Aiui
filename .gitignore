@@ -481,3 +481,4 @@ $RECYCLE.BIN/
 
 src/Web/appsettings.Development.json
 src/Web/.azure/config
+AIWeb/AIWeb.Web/appsettings.Development.json

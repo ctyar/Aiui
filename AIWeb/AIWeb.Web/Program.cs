@@ -1,3 +1,4 @@
+using Aiui;
 using AIWeb.Web.Components;
 using Microsoft.Extensions.AI;
 
@@ -19,6 +20,20 @@ public class Program
             .UseFunctionInvocation()
             .UseOpenTelemetry(configure: c =>
                 c.EnableSensitiveData = builder.Environment.IsDevelopment());
+
+        builder.Services.AddSingleton(new SqlListPlugin(builder.Configuration.GetConnectionString("SqlServer")!, ["Categories",
+            "CustomerCustomerDemo",
+            "CustomerDemographics",
+            "Customers",
+            "Employees",
+            "EmployeeTerritories",
+            "Order Details",
+            "Orders",
+            "Products",
+            "Region",
+            "Shippers",
+            "Suppliers",
+            "Territories"]));
 
         var app = builder.Build();
 

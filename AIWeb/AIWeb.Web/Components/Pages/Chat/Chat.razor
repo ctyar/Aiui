@@ -2,6 +2,7 @@
 @using System.ComponentModel
 @inject IChatClient ChatClient
 @inject NavigationManager Nav
+@inject Aiui.SqlListPlugin sqlListPlugin;
 @implements IDisposable
 
 <PageTitle>Chat</PageTitle>
@@ -10,33 +11,22 @@
 
 <ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage">
     <NoMessagesContent>
-        <div>To get started, try asking about these example documents. You can replace these with your own data and replace this message.</div>
-        <ChatCitation File="Example_Emergency_Survival_Kit.pdf"/>
-        <ChatCitation File="Example_GPS_Watch.pdf"/>
+        <div>To get started, try asking about the active products.</div>
     </NoMessagesContent>
 </ChatMessageList>
 
 <div class="chat-container">
     <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
     <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" />
-    <SurveyPrompt /> @* Remove this line to eliminate the template survey message *@
 </div>
 
 @code {
     private const string SystemPrompt = @"
-        You are an assistant who answers questions about information you retrieve.
+        You are a software developer.
+        Do not give comment or explanation.
         Do not answer questions about anything else.
-        Use only simple markdown to format your responses.
 
-        Use the search tool to find relevant information. When you do this, end your
-        reply with citations in the special XML format:
-
-        <citation filename='string' page_number='number'>exact quote here</citation>
-
-        Always include the citation in your response if there are results.
-
-        The quote must be max 5 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
-        Don't refer to the presence of citations; just emit these tags right at the end, with no surrounding text.
+        Only use the tools available to you.
         ";
 
     private readonly ChatOptions chatOptions = new();
@@ -46,10 +36,13 @@
     private ChatInput? chatInput;
     private ChatSuggestions? chatSuggestions;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         messages.Add(new(ChatRole.System, SystemPrompt));
-        chatOptions.Tools = [AIFunctionFactory.Create(SearchAsync)];
+        var prompt = await sqlListPlugin.BuildPromptAsync(null, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
+        var promptList = string.Join("\r\n", prompt!.Select(i => i.Content));
+        messages.Add(new(ChatRole.System, promptList));
+        chatOptions.Tools = [AIFunctionFactory.Create(ListAsync)];
     }
 
     private async Task AddUserMessageAsync(ChatMessage userMessage)
@@ -99,18 +92,32 @@
         await chatInput!.FocusAsync();
     }
 
-    [Description("Searches for information using a phrase or keyword")]
-    private async Task<IEnumerable<string>> SearchAsync(
-        [Description("The phrase to search for.")] string searchPhrase,
-        [Description("If possible, specify the filename to search that file only. If not provided or empty, the search includes all files.")] string? filenameFilter = null)
+    public void Dispose()
     {
-        await InvokeAsync(StateHasChanged);
-        /*var results = await Search.SearchAsync(searchPhrase, filenameFilter, maxResults: 5);
-        return results.Select(result =>
-            $"<result filename=\"{result.DocumentId}\" page_number=\"{result.PageNumber}\">{result.Text}</result>");*/
-        return [];
+        currentResponseCancellation?.Cancel();
     }
 
-    public void Dispose()
-        => currentResponseCancellation?.Cancel();
+    [Description("Displays a list of the data available in the database.")]
+    private async Task<IEnumerable<string>> ListAsync(
+        [Description("The Microsoft SQL Server query.")] string sqlQuery)
+    {
+        await InvokeAsync(StateHasChanged);
+
+        var data = await sqlListPlugin.GetResultAsync(sqlQuery, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
+
+        var result = new List<string>();
+
+        if (data is List<dynamic> rows)
+        {
+            foreach (var row in rows)
+            {
+                var dic = row as IDictionary<string, object>;
+                var value = string.Join(" ", dic.Values.Select(i => i.ToString()));
+                
+                result.Add(value);
+            }
+        }
+
+        return result;
+    }
 }

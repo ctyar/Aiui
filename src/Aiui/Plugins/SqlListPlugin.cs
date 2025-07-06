@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Azure.AI.OpenAI;
 using Microsoft.Extensions.Logging;
@@ -62,26 +61,12 @@ public sealed class SqlListPlugin : IPlugin
         return Task.FromResult(result)!;
     }
 
-    public async Task<object?> GetResultAsync(string aiResponse, ILogger logger)
+    public async Task<object?> GetResultAsync(string sqlQuery, ILogger logger)
     {
-        var sqlQuery = GetSqlQuery(aiResponse);
-
-        if (sqlQuery is null)
-        {
-            return null;
-        }
-
         var sqlServerService = new SqlServerService(logger);
         var data = await sqlServerService.QueryAsync(_connectionString, sqlQuery);
 
         return data;
-    }
-
-    private static string? GetSqlQuery(string aiResponse)
-    {
-        var arguments = JsonSerializer.Deserialize<Arguments>(aiResponse);
-
-        return arguments?.SqlQuery;
     }
 
     private class Arguments

@@ -15,6 +15,8 @@
     </NoMessagesContent>
 </ChatMessageList>
 
+<DataTable Rows="Rows" />
+
 <div class="chat-container">
     <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
     <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" />
@@ -35,6 +37,7 @@
     private ChatMessage? currentResponseMessage;
     private ChatInput? chatInput;
     private ChatSuggestions? chatSuggestions;
+    private List<dynamic> Rows = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -98,26 +101,13 @@
     }
 
     [Description("Displays a list of the data available in the database.")]
-    private async Task<IEnumerable<string>> ListAsync(
+    private async Task ListAsync(
         [Description("The Microsoft SQL Server query.")] string sqlQuery)
     {
         await InvokeAsync(StateHasChanged);
 
         var data = await sqlListPlugin.GetResultAsync(sqlQuery, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
 
-        var result = new List<string>();
-
-        if (data is List<dynamic> rows)
-        {
-            foreach (var row in rows)
-            {
-                var dic = row as IDictionary<string, object>;
-                var value = string.Join(" ", dic.Values.Select(i => i.ToString()));
-                
-                result.Add(value);
-            }
-        }
-
-        return result;
+        Rows = (List<dynamic>)data!;
     }
 }

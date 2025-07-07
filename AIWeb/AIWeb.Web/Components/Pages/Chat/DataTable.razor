@@ -1,0 +1,31 @@
+﻿@if (Rows?.Count > 0)
+{
+    <div class="data-table-container">
+        <table data-toggle="table" data-search="true" data-show-columns="true" data-pagination="true">
+            <thead>
+                <tr>
+                    @foreach (var keyValuePair in Rows.First())
+                    {
+                        <th data-sortable="true">@keyValuePair.Key</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Rows)
+                {
+                    <tr>
+                        @foreach (var keyValuePair in row)
+                        {
+                            <td>@keyValuePair.Value</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public List<dynamic>? Rows { get; set; }
+}

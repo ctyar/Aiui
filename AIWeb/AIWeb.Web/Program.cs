@@ -35,6 +35,8 @@ public class Program
             "Suppliers",
             "Territories"]));
 
+        builder.Services.AddSingleton<ChartJsPlugin>();
+
         var app = builder.Build();
 
         app.MapDefaultEndpoints();

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Azure.AI.OpenAI;
 using Microsoft.Extensions.Logging;
@@ -49,7 +48,7 @@ public sealed class ChartJsPlugin : IPlugin
                 result.Add(new Message
                 {
                     Type = MessageType.AI,
-                    Content = $"Imagine we have an object named data which is an array of objects with these properties: {columns}"
+                    Content = $"We have a JavaScript variable named 'context' which is an array of objects with these properties: {columns}. This variable `context` holds the data for the ChartJS."
                 });
             }
         }
@@ -59,35 +58,12 @@ public sealed class ChartJsPlugin : IPlugin
 
     public Task<object?> GetResultAsync(string aiResponse, ILogger logger)
     {
-        var jsCode = GetJsQuery(aiResponse);
-
-        if (jsCode is null)
+        if (aiResponse is null)
         {
             return Task.FromResult((object?)null);
         }
 
-        return Task.FromResult((object?)jsCode);
-    }
-
-    private static string? GetJsQuery(string aiResponse)
-    {
-        aiResponse = aiResponse.Replace("\n", "");
-
-        var index = aiResponse.IndexOf("`");
-        if (index == -1)
-        {
-            var arguments = JsonSerializer.Deserialize<Arguments>(aiResponse);
-
-            return arguments?.ChartJsCode;
-        }
-
-        // For some reason sometimes the response is not a valid JSON
-        aiResponse = aiResponse.Remove(0, index + 1);
-
-        index = aiResponse.IndexOf("`");
-        aiResponse = aiResponse.Remove(index);
-
-        return aiResponse;
+        return Task.FromResult((object?)aiResponse);
     }
 
     private class Arguments

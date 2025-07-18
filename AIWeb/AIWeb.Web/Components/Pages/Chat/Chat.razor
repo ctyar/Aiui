@@ -1,8 +1,10 @@
 ﻿@page "/"
 @using System.ComponentModel
+@using System.Text.Json
 @inject IChatClient ChatClient
 @inject NavigationManager Nav
 @inject Aiui.SqlListPlugin sqlListPlugin;
+@inject Aiui.ChartJsPlugin chartJsPlugin;
 @implements IDisposable
 
 <PageTitle>Chat</PageTitle>
@@ -16,6 +18,8 @@
 </ChatMessageList>
 
 <DataTable Rows="Rows" />
+
+<Graph Data="@GraphData" Code="@GraphCode" />
 
 <div class="chat-container">
     <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
@@ -38,18 +42,30 @@
     private ChatInput? chatInput;
     private ChatSuggestions? chatSuggestions;
     private List<dynamic> Rows = [];
+    private string? GraphData;
+    private string? GraphCode;
 
     protected override async Task OnInitializedAsync()
     {
         messages.Add(new(ChatRole.System, SystemPrompt));
         var prompt = await sqlListPlugin.BuildPromptAsync(null, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
+
         var promptList = string.Join("\r\n", prompt!.Select(i => i.Content));
+
         messages.Add(new(ChatRole.System, promptList));
-        chatOptions.Tools = [AIFunctionFactory.Create(ListAsync)];
+        chatOptions.Tools = [AIFunctionFactory.Create(ListAsync), AIFunctionFactory.Create(ChartAsync)];
     }
 
     private async Task AddUserMessageAsync(ChatMessage userMessage)
     {
+        if (userMessage.Text == "NOW")
+        {
+            var prompt = await chartJsPlugin.BuildPromptAsync(Rows, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
+            var promptList = string.Join("\r\n", prompt!.Select(i => i.Content));
+            messages.Add(new(ChatRole.System, promptList));
+            return;
+        }
+
         CancelAnyCurrentResponse();
 
         // Add the user message to the conversation
@@ -109,5 +125,21 @@
         var data = await sqlListPlugin.GetResultAsync(sqlQuery, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
 
         Rows = (List<dynamic>)data!;
+        
+        Console.WriteLine($"============{sqlQuery}============");
+    }
+
+    [Description("Receives the JavaScript code needed for Chart.js as string and draws the chart for the listed data.")]
+    private async Task ChartAsync(
+        [Description("The JavaScript code needed for Chart.js as string to draw a chart in an HTML canvas element with the id 'myChart'.")] string chartJsCode)
+    {
+        await InvokeAsync(StateHasChanged);
+
+        var jsCode = await chartJsPlugin.GetResultAsync(chartJsCode, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
+
+        GraphData = JsonSerializer.Serialize(Rows);
+        GraphCode = (string?)jsCode;
+
+        messages.Add(new(ChatRole.Assistant, chartJsCode));
     }
 }

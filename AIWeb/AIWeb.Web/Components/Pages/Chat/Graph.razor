@@ -1,0 +1,41 @@
+﻿@inject IJSRuntime JS
+
+@if (Code is not null)
+{
+    <div>
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        export function draw()
+        {
+            var context = JSON.parse('[{"ProductID":1,"ProductName":"Chai","SupplierID":1,"CategoryID":1,"QuantityPerUnit":"10 boxes x 20 bags","UnitPrice":18.0000,"UnitsInStock":39,"UnitsOnOrder":0,"ReorderLevel":10,"Discontinued":false}]')
+
+            @((MarkupString)Code)
+        }
+    </script>
+}
+
+@code {
+    [Parameter]
+    public string? Data { get; set; }
+
+    [Parameter]
+    public string? Code { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (Data is null || Code is null)
+            {
+                return;
+            }
+
+            await JS.InvokeVoidAsync("draw");
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+    }
+}

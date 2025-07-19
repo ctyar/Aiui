@@ -1,4 +1,5 @@
-﻿@inject IJSRuntime JSRuntime
+﻿@using System.Text.Json
+@inject IJSRuntime JSRuntime
 
 @if (Code is not null || true)
 {
@@ -9,9 +10,9 @@
     <script id="chartScript"></script>
 
     <script>
-        Blazor.registerFunction('RawHtml', function (element, value) {
-            element.innerHTML = value;
-        });
+        window.RawHtml = (elementId, value) => {
+            document.getElementById(elementId).innerHTML = value;
+        }
     </script>
 }
 
@@ -22,16 +23,42 @@
     [Parameter]
     public string? Code { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        Code = "";
-
-        //Code = @"""{ type: 'line', data: { labels: ['Jan', 'Feb', 'Mar'], datasets: [{ label: 'Cars sold', data: [26, 44, 54], backgroundColor: '#57a64a', borderColor: '#57a64a', fill: false }] } } """;
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var code = "";
+        var jsonData = JsonSerializer.Serialize(Data);
+
+        if (Data is null)
+        {
+            jsonData = "[{\"ProductID\":1,\"ProductName\":\"Chai\",\"SupplierID\":1,\"CategoryID\":1,\"QuantityPerUnit\":\"10 boxes x 20 bags\",\"UnitPrice\":18.0000,\"UnitsInStock\":39,\"UnitsOnOrder\":0,\"ReorderLevel\":10,\"Discontinued\":false}]";
+        }
+
+        var code = $@"
+            var context = JSON.parse('{jsonData}');
+
+            if (Chart.getChart('myChart')) {{
+                Chart.getChart('myChart')?.destroy();
+            }}
+
+            const ctx = document.getElementById('myChart').getContext('2d');
+            new Chart(ctx, {{type: 'bar',
+                data: {{
+                    labels: context.map(product => product.ProductName),
+                    datasets: [{{
+                        label: 'Units in Stock',
+                        data: context.map(product => product.UnitsInStock),
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }}]
+                }},
+                options: {{
+                    scales: {{
+                        y: {{
+                            beginAtZero: true
+                        }}
+                    }}
+                }}
+            }});";
 
         await JSRuntime.InvokeVoidAsync("RawHtml", "chartScript", code);
     }

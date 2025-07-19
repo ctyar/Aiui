@@ -21,19 +21,22 @@ public class Program
             .UseOpenTelemetry(configure: c =>
                 c.EnableSensitiveData = builder.Environment.IsDevelopment());
 
-        builder.Services.AddSingleton(new SqlListPlugin(builder.Configuration.GetConnectionString("SqlServer")!, ["Categories",
+        builder.Services.AddSingleton(new SqlListPlugin(builder.Configuration.GetConnectionString("SqlServer")!,
+        [
+            /*"Categories",
             "CustomerCustomerDemo",
             "CustomerDemographics",
             "Customers",
             "Employees",
             "EmployeeTerritories",
             "Order Details",
-            "Orders",
+            "Orders",*/
             "Products",
-            "Region",
+            /*"Region",
             "Shippers",
             "Suppliers",
-            "Territories"]));
+            "Territories"*/
+        ]));
 
         builder.Services.AddSingleton<ChartJsPlugin>();
 

@@ -77,7 +77,10 @@
         var responseText = new TextContent("");
         currentResponseMessage = new ChatMessage(ChatRole.Assistant, [responseText]);
         currentResponseCancellation = new();
-        await foreach (var update in ChatClient.GetStreamingResponseAsync([.. messages], chatOptions, currentResponseCancellation.Token))
+
+        await ChartAsync("alert('test')");
+
+        /*await foreach (var update in ChatClient.GetStreamingResponseAsync([.. messages], chatOptions, currentResponseCancellation.Token))
         {
             messages.AddMessages(update, filter: c => c is not TextContent);
             responseText.Text += update.Text;
@@ -87,7 +90,7 @@
         // Store the final response in the conversation, and begin getting suggestions
         messages.Add(currentResponseMessage!);
         currentResponseMessage = null;
-        chatSuggestions?.Update(messages);
+        chatSuggestions?.Update(messages);*/
     }
 
     private void CancelAnyCurrentResponse()

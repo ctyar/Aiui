@@ -58,6 +58,7 @@
 
     private async Task AddUserMessageAsync(ChatMessage userMessage)
     {
+        // TODO: Fix
         if (userMessage.Text == "NOW")
         {
             var prompt = await chartJsPlugin.BuildPromptAsync(Rows, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
@@ -78,9 +79,7 @@
         currentResponseMessage = new ChatMessage(ChatRole.Assistant, [responseText]);
         currentResponseCancellation = new();
 
-        await ChartAsync("alert('test')");
-
-        /*await foreach (var update in ChatClient.GetStreamingResponseAsync([.. messages], chatOptions, currentResponseCancellation.Token))
+        await foreach (var update in ChatClient.GetStreamingResponseAsync([.. messages], chatOptions, currentResponseCancellation.Token))
         {
             messages.AddMessages(update, filter: c => c is not TextContent);
             responseText.Text += update.Text;
@@ -90,7 +89,7 @@
         // Store the final response in the conversation, and begin getting suggestions
         messages.Add(currentResponseMessage!);
         currentResponseMessage = null;
-        chatSuggestions?.Update(messages);*/
+        chatSuggestions?.Update(messages);
     }
 
     private void CancelAnyCurrentResponse()
@@ -128,8 +127,6 @@
         var data = await sqlListPlugin.GetResultAsync(sqlQuery, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
 
         Rows = (List<dynamic>)data!;
-        
-        Console.WriteLine($"============{sqlQuery}============");
     }
 
     [Description("Receives the JavaScript code needed for Chart.js as string and draws the chart for the listed data.")]

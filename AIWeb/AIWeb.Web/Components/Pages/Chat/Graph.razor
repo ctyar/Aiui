@@ -1,20 +1,17 @@
 ﻿@using System.Text.Json
 @inject IJSRuntime JSRuntime
 
-@if (Code is not null || true)
-{
-    <div>
-        <canvas id="myChart"></canvas>
-    </div>
+<div>
+    <canvas id="myChart"></canvas>
+</div>
 
-    <script id="chartScript"></script>
+<script id="chartScript"></script>
 
-    <script>
-        window.RawHtml = (elementId, value) => {
-            document.getElementById(elementId).innerHTML = value;
-        }
-    </script>
-}
+<script>
+    window.RawHtml = (elementId, value) => {
+        document.getElementById(elementId).innerHTML = value;
+    }
+</script>
 
 @code {
     [Parameter]
@@ -25,41 +22,46 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var jsonData = JsonSerializer.Serialize(Data);
-
         if (Data is null)
         {
-            jsonData = "[{\"ProductID\":1,\"ProductName\":\"Chai\",\"SupplierID\":1,\"CategoryID\":1,\"QuantityPerUnit\":\"10 boxes x 20 bags\",\"UnitPrice\":18.0000,\"UnitsInStock\":39,\"UnitsOnOrder\":0,\"ReorderLevel\":10,\"Discontinued\":false}]";
+            Data = "[{\"ProductID\":1,\"ProductName\":\"Chai\",\"SupplierID\":1,\"CategoryID\":1,\"QuantityPerUnit\":\"10 boxes x 20 bags\",\"UnitPrice\":18.0000,\"UnitsInStock\":39,\"UnitsOnOrder\":0,\"ReorderLevel\":10,\"Discontinued\":false}]";
         }
 
-        var code = $@"
-            var context = JSON.parse('{jsonData}');
-
-            if (Chart.getChart('myChart')) {{
-                Chart.getChart('myChart')?.destroy();
-            }}
-
-            const ctx = document.getElementById('myChart').getContext('2d');
-            new Chart(ctx, {{type: 'bar',
-                data: {{
+        if (Code is null)
+        {
+            Code = @"var ctx = document.getElementById('myChart').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
                     labels: context.map(product => product.ProductName),
-                    datasets: [{{
+                    datasets: [{
                         label: 'Units in Stock',
                         data: context.map(product => product.UnitsInStock),
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 1
-                    }}]
-                }},
-                options: {{
-                    scales: {{
-                        y: {{
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
                             beginAtZero: true
-                        }}
-                    }}
-                }}
-            }});";
+                        }
+                    }
+                }
+            });";
+        }
 
-        await JSRuntime.InvokeVoidAsync("RawHtml", "chartScript", code);
+        var function = $@"
+            var context = JSON.parse('{Data}');
+
+            if (Chart.getChart('myChart')) {{
+                Chart.getChart('myChart')?.destroy();
+            }}
+
+            {Code}
+            ";
+
+        await JSRuntime.InvokeVoidAsync("RawHtml", "chartScript", function);
     }
 }

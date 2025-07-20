@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Microsoft.Extensions.AI;
 
 namespace Aiui;
 
 public interface IPlugin
 {
-    Task<List<Message>> GetRootPromptAsync();
+    Task<ChatMessage?> GetRootPromptAsync();
 
-    Task<List<Message>> GetContextPromptAsync(object? context);
+    Task<ChatMessage?> GetContextPromptAsync(object? context);
 
     Task<object?> ExecuteAsync(string aiResponse);
 }

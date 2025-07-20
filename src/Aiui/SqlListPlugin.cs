@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.AI;
 
 namespace Aiui;
 
@@ -20,31 +21,32 @@ public sealed class SqlListPlugin : IPlugin
         _sqlServerService = new SqlServerService();
     }
 
-    public Task<List<Message>> GetRootPromptAsync()
+    public Task<ChatMessage?> GetRootPromptAsync()
     {
         var schema = _sqlServerService.GetSchema(_connectionString, _tableNames);
 
         if (schema is null)
         {
-            return Task.FromResult<List<Message>>([]);
+            return Task.FromResult<ChatMessage?>(null);
         }
 
-        var result = new List<Message>();
+        var textContents = new List<AIContent>();
+
         foreach (var tableSchema in schema)
         {
-            result.Add(new Message
-            {
-                Type = MessageType.AI,
-                Content = tableSchema
-            });
+            textContents.Add(new TextContent(tableSchema));
         }
 
-        return Task.FromResult(result)!;
+        return Task.FromResult<ChatMessage?>(new ChatMessage
+        {
+            Role = ChatRole.System,
+            Contents = textContents
+        });
     }
 
-    public Task<List<Message>> GetContextPromptAsync(object? context)
+    public Task<ChatMessage?> GetContextPromptAsync(object? context)
     {
-        return Task.FromResult<List<Message>>([]);
+        return Task.FromResult<ChatMessage?>(null);
     }
 
     public async Task<object?> ExecuteAsync(string sqlQuery)

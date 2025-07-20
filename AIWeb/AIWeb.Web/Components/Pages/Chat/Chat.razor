@@ -41,7 +41,7 @@
     private ChatMessage? currentResponseMessage;
     private ChatInput? chatInput;
     private ChatSuggestions? chatSuggestions;
-    private List<dynamic> Rows = [];
+    private List<dynamic>? Rows;
     private string? GraphData;
     private string? GraphCode;
 
@@ -126,7 +126,7 @@
 
         var data = await sqlListPlugin.GetResultAsync(sqlQuery, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
 
-        Rows = (List<dynamic>)data!;
+        Rows = (List<dynamic>?)data;
     }
 
     [Description("Receives the JavaScript code needed for Chart.js as string and draws the chart for the listed data.")]

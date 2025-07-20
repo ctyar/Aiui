@@ -9,8 +9,6 @@
 
 <PageTitle>Chat</PageTitle>
 
-<ChatHeader OnNewChat="@ResetConversationAsync" />
-
 <ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage">
     <NoMessagesContent>
         <div>To get started, try asking about the active products.</div>
@@ -23,7 +21,7 @@
 
 <div class="chat-container">
     <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
-    <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" />
+    <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" OnNewChat="@ResetConversationAsync" />
 </div>
 
 @code {

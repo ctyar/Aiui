@@ -5,14 +5,6 @@
     <canvas id="myChart"></canvas>
 </div>
 
-<script id="chartScript"></script>
-
-<script>
-    window.RawHtml = (elementId, value) => {
-        document.getElementById(elementId).innerHTML = value;
-    }
-</script>
-
 @code {
     [Parameter]
     public string? Data { get; set; }
@@ -22,34 +14,9 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Data is null)
+        if (Code is null || Data is null)
         {
-            Data = "[{\"ProductID\":1,\"ProductName\":\"Chai\",\"SupplierID\":1,\"CategoryID\":1,\"QuantityPerUnit\":\"10 boxes x 20 bags\",\"UnitPrice\":18.0000,\"UnitsInStock\":39,\"UnitsOnOrder\":0,\"ReorderLevel\":10,\"Discontinued\":false}]";
-        }
-
-        if (Code is null)
-        {
-            Code = @"var ctx = document.getElementById('myChart').getContext('2d');
-            var chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: context.map(product => product.ProductName),
-                    datasets: [{
-                        label: 'Units in Stock',
-                        data: context.map(product => product.UnitsInStock),
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });";
+            return;
         }
 
         var function = $@"
@@ -62,6 +29,6 @@
             {Code}
             ";
 
-        await JSRuntime.InvokeVoidAsync("RawHtml", "chartScript", function);
+        await JSRuntime.InvokeVoidAsync("eval", function);
     }
 }

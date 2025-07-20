@@ -15,9 +15,9 @@
     </NoMessagesContent>
 </ChatMessageList>
 
-<DataTable Rows="Rows" />
-
 <Graph Data="@GraphData" Code="@GraphCode" />
+
+<DataTable Rows="Rows" />
 
 <div class="chat-container">
     <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />

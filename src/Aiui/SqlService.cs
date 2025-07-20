@@ -4,19 +4,11 @@ using System.Threading.Tasks;
 using Dapper;
 using DatabaseSchemaReader.DataSchema;
 using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
 
 namespace Aiui;
 
 internal sealed class SqlServerService
 {
-    private readonly ILogger _logger;
-
-    public SqlServerService(ILogger logger)
-    {
-        _logger = logger;
-    }
-
     public List<string>? GetSchema(string connectionString, List<string> tables)
     {
         var tablesSchema = GetSchemaCore(connectionString, tables);
@@ -44,7 +36,23 @@ internal sealed class SqlServerService
         return result;
     }
 
-    private List<DatabaseTable>? GetSchemaCore(string connectionString, List<string> tables)
+    public async Task<List<dynamic>?> QueryAsync(string connectionString, string query)
+    {
+        using var connection = new SqlConnection(connectionString);
+
+        try
+        {
+            var result = (await connection.QueryAsync(query)).ToList();
+
+            return result;
+        }
+        catch (SqlException)
+        {
+            return null;
+        }
+    }
+
+    private static List<DatabaseTable>? GetSchemaCore(string connectionString, List<string> tables)
     {
         using var sqlConnection = new SqlConnection(connectionString);
 
@@ -56,9 +64,8 @@ internal sealed class SqlServerService
 
             return schema.Tables.Where(item => tables.Contains(item.Name)).ToList();
         }
-        catch (SqlException e)
+        catch (SqlException)
         {
-            _logger.LogError(e, "Getting schema failed");
             return null;
         }
     }
@@ -74,27 +81,10 @@ internal sealed class SqlServerService
             var primaryKey = column.IsPrimaryKey ? "primary key" : string.Empty;
             var foreignKey = column.IsForeignKey ? "foreign key" : string.Empty;
 
-            result.Add($"Column {i} called [{column.Name}] which is a an {nullability} {column.DataType.TypeName} {primaryKey} {foreignKey}");
+            result.Add($"Column {i} called [{column.Name}] which is a {nullability} {column.DataType.TypeName} {primaryKey} {foreignKey}");
             i++;
         }
 
         return result;
-    }
-
-    public async Task<List<dynamic>?> QueryAsync(string connectionString, string query)
-    {
-        using var connection = new SqlConnection(connectionString);
-
-        try
-        {
-            var result = (await connection.QueryAsync(query)).ToList();
-
-            return result;
-        }
-        catch (SqlException e)
-        {
-            _logger.LogError(e, "Executing query failed");
-            return null;
-        }
     }
 }

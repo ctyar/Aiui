@@ -13,7 +13,12 @@
 
 @if (!IsDbReady)
 {
-    <LoadingSpinner />
+    <div class="chat-container page-width">
+        <div><strong>Starting up the SQL Server</strong></div>
+        <div>This demo utilizes the free Azure SQL Database offering, which may take up to a minute to wakeup</div>
+        <div>Thank you for your patience</div>
+        <LoadingSpinner />
+    </div>
 }
 else
 {

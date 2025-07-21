@@ -20,13 +20,13 @@ internal sealed class SqlServerService
 
         var result = new List<string>
         {
-            "Imagine we have a Microsoft SQL Server database with these tables."
+            "We have a Microsoft SQL Server database with these tables."
         };
 
         // TODO: Test valid SQL instead of this
         foreach (var table in tablesSchema)
         {
-            result.Add($"A table called [{table.Name}] with {table.Columns.Count} columns");
+            result.Add($"A table called [{table.Name}] with {table.Columns.Count} columns.");
 
             var prompts = GetPrompts(table);
 
@@ -81,7 +81,7 @@ internal sealed class SqlServerService
             var primaryKey = column.IsPrimaryKey ? "primary key" : string.Empty;
             var foreignKey = column.IsForeignKey ? "foreign key" : string.Empty;
 
-            result.Add($"Column {i} called [{column.Name}] which is a {nullability} {column.DataType.TypeName} {primaryKey} {foreignKey}");
+            result.Add($"Column {i} called [{column.Name}] which is a {nullability} {column.DataType.TypeName} {primaryKey} {foreignKey}.");
             i++;
         }
 

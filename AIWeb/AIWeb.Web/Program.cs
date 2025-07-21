@@ -23,19 +23,21 @@ public class Program
 
         builder.Services.AddSingleton(new SqlListPlugin(builder.Configuration.GetConnectionString("SqlServer")!,
         [
-            /*"Categories",
+            "Products",
+#if !DEBUG
+            "Categories",
             "CustomerCustomerDemo",
             "CustomerDemographics",
             "Customers",
             "Employees",
             "EmployeeTerritories",
             "Order Details",
-            "Orders",*/
-            "Products",
-            /*"Region",
+            "Orders",
+            "Region",
             "Shippers",
             "Suppliers",
-            "Territories"*/
+            "Territories"
+#endif
         ]));
 
         builder.Services.AddSingleton<ChartJsPlugin>();

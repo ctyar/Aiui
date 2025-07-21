@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.AI;
 
@@ -30,17 +31,17 @@ public sealed class SqlListPlugin : IPlugin
             return Task.FromResult<ChatMessage?>(null);
         }
 
-        var textContents = new List<AIContent>();
+        var stringBuilder = new StringBuilder();
 
         foreach (var tableSchema in schema)
         {
-            textContents.Add(new TextContent(tableSchema));
+            stringBuilder.Append(tableSchema + "\r\n");
         }
 
         return Task.FromResult<ChatMessage?>(new ChatMessage
         {
             Role = ChatRole.System,
-            Contents = textContents
+            Contents = [new TextContent(stringBuilder.ToString())]
         });
     }
 

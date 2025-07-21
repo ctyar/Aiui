@@ -155,13 +155,12 @@ else
 
     private async Task SetRootPromptsAsync()
     {
-        messages.Add(new(ChatRole.System, @"
-            You are a software developer.
-            Do not give comment or explanation.
-            Do not answer questions about anything else.
+        messages.Add(new(ChatRole.System,
+@"You are a software developer.
+Do not give comment or explanation.
+Do not answer questions about anything else.
 
-            Only use the tools available to you.
-            "));
+Only use the tools available to you."));
 
         var rootPrompts = new List<ChatMessage>();
 

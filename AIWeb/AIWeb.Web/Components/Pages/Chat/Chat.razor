@@ -39,16 +39,9 @@ else
 }
 
 @code {
-    private const string SystemPrompt = @"
-        You are a software developer.
-        Do not give comment or explanation.
-        Do not answer questions about anything else.
-
-        Only use the tools available to you.
-        ";
-
     private readonly ChatOptions chatOptions = new();
-    private readonly List<ChatMessage> messages = new();
+    private readonly List<ChatMessage> messages = [];
+    private readonly List<ChatMessage> ContextPrompts = [];
     private CancellationTokenSource? currentResponseCancellation;
     private ChatMessage? currentResponseMessage;
     private ChatInput? chatInput;
@@ -58,53 +51,34 @@ else
     private string? GraphCode;
     private bool IsDbReady = false;
     private bool IsSetRootPrompts = false;
+    private bool IsInitialSuggestionsLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
         await WaitForDbAsync();
 
-        messages.Add(new(ChatRole.System, SystemPrompt));
-
-        var rootPrompts = new List<ChatMessage>();
-
-        var rootPrompt = await sqlListPlugin.GetRootPromptAsync();
-        if (rootPrompt is not null)
-        {
-            rootPrompts.Add(rootPrompt);
-        }
-
-        rootPrompt = await sqlListPlugin.GetRootPromptAsync();
-        if (rootPrompt is not null)
-        {
-            rootPrompts.Add(rootPrompt);
-        }
-
-        messages.AddRange(rootPrompts);
+        await SetRootPromptsAsync();
 
         chatOptions.Tools = [AIFunctionFactory.Create(ListAsync), AIFunctionFactory.Create(ChartAsync)];
     }
 
     protected override void OnAfterRender(bool firstRender)
     {
-        chatSuggestions?.Update(messages);
+        if (ContextPrompts.Count > 0)
+        {
+            messages.AddRange(ContextPrompts);
+
+            ContextPrompts.Clear();
+        }
+
+        if (!IsInitialSuggestionsLoaded && messages.Count > 0)
+        {
+            chatSuggestions?.Update(messages);
+        }
     }
 
     private async Task AddUserMessageAsync(ChatMessage userMessage)
     {
-        // TODO: Fix
-        if (userMessage.Text == "NOW")
-        {
-            var contextPrompt = await chartJsPlugin.GetContextPromptAsync(Rows);
-            if (contextPrompt is null)
-            {
-                return;
-            }
-
-            messages.Add(contextPrompt);
-
-            return;
-        }
-
         CancelAnyCurrentResponse();
 
         // Add the user message to the conversation
@@ -145,9 +119,13 @@ else
     private async Task ResetConversationAsync()
     {
         CancelAnyCurrentResponse();
+        
         messages.Clear();
-        messages.Add(new(ChatRole.System, SystemPrompt));
+        await SetRootPromptsAsync();
+
         chatSuggestions?.Clear();
+        chatSuggestions?.Update(messages);
+
         await chatInput!.FocusAsync();
     }
 
@@ -175,6 +153,33 @@ else
         }
     }
 
+    private async Task SetRootPromptsAsync()
+    {
+        messages.Add(new(ChatRole.System, @"
+            You are a software developer.
+            Do not give comment or explanation.
+            Do not answer questions about anything else.
+
+            Only use the tools available to you.
+            "));
+
+        var rootPrompts = new List<ChatMessage>();
+
+        var rootPrompt = await sqlListPlugin.GetRootPromptAsync();
+        if (rootPrompt is not null)
+        {
+            rootPrompts.Add(rootPrompt);
+        }
+
+        rootPrompt = await sqlListPlugin.GetRootPromptAsync();
+        if (rootPrompt is not null)
+        {
+            rootPrompts.Add(rootPrompt);
+        }
+
+        messages.AddRange(rootPrompts);
+    }
+
     [Description("Displays a list of the data available in the database.")]
     private async Task ListAsync(
         [Description("The Microsoft SQL Server query.")] string sqlQuery)
@@ -184,6 +189,14 @@ else
         var data = await sqlListPlugin.ExecuteAsync(sqlQuery);
 
         Rows = (List<dynamic>?)data;
+
+        var contextPrompt = await chartJsPlugin.GetContextPromptAsync(Rows);
+        if (contextPrompt is null)
+        {
+            return;
+        }
+
+        ContextPrompts.AddRange(contextPrompt);
     }
 
     [Description("Receives the JavaScript code needed for Chart.js as string and draws the chart for the listed data.")]

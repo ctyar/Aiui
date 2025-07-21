@@ -61,6 +61,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await WaitForDbAsync();
+
         messages.Add(new(ChatRole.System, SystemPrompt));
 
         var rootPrompts = new List<ChatMessage>();
@@ -80,8 +82,6 @@ else
         messages.AddRange(rootPrompts);
 
         chatOptions.Tools = [AIFunctionFactory.Create(ListAsync), AIFunctionFactory.Create(ChartAsync)];
-
-        WaitForDb();
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -156,7 +156,7 @@ else
         currentResponseCancellation?.Cancel();
     }
 
-    private void WaitForDb()
+    private async Task WaitForDbAsync()
     {
         using var connection = new SqlConnection(configuration.GetConnectionString("SqlServer"));
 
@@ -164,7 +164,7 @@ else
         {
             try
             {
-                connection.Open();
+                await connection.OpenAsync();
                 connection.Close();
                 IsDbReady = true;
                 return;

@@ -1,28 +1,37 @@
 ﻿@page "/"
 @using System.ComponentModel
 @using System.Text.Json
+@using Microsoft.Data.SqlClient
 @inject IChatClient ChatClient
 @inject NavigationManager Nav
 @inject Aiui.SqlListPlugin sqlListPlugin;
 @inject Aiui.ChartJsPlugin chartJsPlugin;
+@inject IConfiguration configuration;
 @implements IDisposable
 
-<PageTitle>Chat</PageTitle>
+<PageTitle>AIUI</PageTitle>
 
-<ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage">
-    <NoMessagesContent>
-        <div>To get started, try asking about the active products.</div>
-    </NoMessagesContent>
-</ChatMessageList>
+@if (!IsDbReady)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage">
+        <NoMessagesContent>
+            <div>To get started, try asking about the active products.</div>
+        </NoMessagesContent>
+    </ChatMessageList>
 
-<Graph Data="@GraphData" Code="@GraphCode" />
+    <Graph Data="@GraphData" Code="@GraphCode" />
 
-<DataTable Rows="Rows" />
+    <DataTable Rows="Rows" />
 
-<div class="chat-container">
-    <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
-    <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" OnNewChat="@ResetConversationAsync" />
-</div>
+    <div class="chat-container">
+        <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
+        <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" OnNewChat="@ResetConversationAsync" />
+    </div>
+}
 
 @code {
     private const string SystemPrompt = @"
@@ -42,16 +51,33 @@
     private List<dynamic>? Rows;
     private string? GraphData;
     private string? GraphCode;
+    private bool IsDbReady = false;
+    private bool IsSetRootPrompts = false;
 
     protected override async Task OnInitializedAsync()
     {
         messages.Add(new(ChatRole.System, SystemPrompt));
-        var prompt = await sqlListPlugin.BuildPromptAsync(null, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
 
-        var promptList = string.Join("\r\n", prompt!.Select(i => i.Content));
+        var rootPrompts = new List<ChatMessage>();
 
-        messages.Add(new(ChatRole.System, promptList));
+        var rootPrompt = await sqlListPlugin.GetRootPromptAsync();
+        if (rootPrompt is not null)
+        {
+            rootPrompts.Add(rootPrompt);
+        }
+
+        rootPrompt = await sqlListPlugin.GetRootPromptAsync();
+        if (rootPrompt is not null)
+        {
+            rootPrompts.Add(rootPrompt);
+        }
+
+        messages.AddRange(rootPrompts);
+
         chatOptions.Tools = [AIFunctionFactory.Create(ListAsync), AIFunctionFactory.Create(ChartAsync)];
+
+        WaitForDb();
+    }
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -123,6 +149,25 @@
     public void Dispose()
     {
         currentResponseCancellation?.Cancel();
+    }
+
+    private void WaitForDb()
+    {
+        using var connection = new SqlConnection(configuration.GetConnectionString("SqlServer"));
+
+        while (true)
+        {
+            try
+            {
+                connection.Open();
+                connection.Close();
+                IsDbReady = true;
+                return;
+            }
+            catch (SqlException)
+            {
+            }
+        }
     }
 
     [Description("Displays a list of the data available in the database.")]

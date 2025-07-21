@@ -52,6 +52,10 @@
 
         messages.Add(new(ChatRole.System, promptList));
         chatOptions.Tools = [AIFunctionFactory.Create(ListAsync), AIFunctionFactory.Create(ChartAsync)];
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        chatSuggestions?.Update(messages);
     }
 
     private async Task AddUserMessageAsync(ChatMessage userMessage)

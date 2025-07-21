@@ -59,9 +59,14 @@
         // TODO: Fix
         if (userMessage.Text == "NOW")
         {
-            var prompt = await chartJsPlugin.BuildPromptAsync(Rows, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
-            var promptList = string.Join("\r\n", prompt!.Select(i => i.Content));
-            messages.Add(new(ChatRole.System, promptList));
+            var contextPrompt = await chartJsPlugin.GetContextPromptAsync(Rows);
+            if (contextPrompt is null)
+            {
+                return;
+            }
+
+            messages.Add(contextPrompt);
+
             return;
         }
 
@@ -122,7 +127,7 @@
     {
         await InvokeAsync(StateHasChanged);
 
-        var data = await sqlListPlugin.GetResultAsync(sqlQuery, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
+        var data = await sqlListPlugin.ExecuteAsync(sqlQuery);
 
         Rows = (List<dynamic>?)data;
     }
@@ -133,7 +138,7 @@
     {
         await InvokeAsync(StateHasChanged);
 
-        var jsCode = await chartJsPlugin.GetResultAsync(chartJsCode, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
+        var jsCode = await chartJsPlugin.ExecuteAsync(chartJsCode);
 
         GraphData = JsonSerializer.Serialize(Rows);
         GraphCode = (string?)jsCode;

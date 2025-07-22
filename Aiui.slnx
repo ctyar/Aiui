@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="deploy.ps1" />
+    <File Path="Directory.Build.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+    <File Path="version.json" />
+  </Folder>
+  <Project Path="src/Aiui/Aiui.csproj" />
+  <Project Path="src/Web.AppHost/Web.AppHost.csproj" />
+  <Project Path="src/Web/Web.csproj" />
+</Solution>

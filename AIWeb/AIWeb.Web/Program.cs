@@ -1,6 +1,9 @@
 using Aiui;
 using AIWeb.Web.Components;
 using Microsoft.Extensions.AI;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
 
 namespace AIWeb.Web;
 
@@ -8,22 +11,26 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        var builder = WebApplication.CreateBuilder(args);
+        try
+        {
+            var builder = WebApplication.CreateBuilder(args);
 
-        builder.AddServiceDefaults();
+            AddLogging(builder);
 
-        builder.Services.AddRazorComponents()
-            .AddInteractiveServerComponents();
+            builder.AddServiceDefaults();
 
-        builder.AddAzureOpenAIClient("openai")
-            .AddChatClient("gpt-4o-mini")
-            .UseFunctionInvocation()
-            .UseOpenTelemetry(configure: c =>
-                c.EnableSensitiveData = builder.Environment.IsDevelopment());
+            builder.Services.AddRazorComponents()
+                .AddInteractiveServerComponents();
 
-        builder.Services.AddSingleton(new SqlListPlugin(builder.Configuration.GetConnectionString("SqlServer")!,
-        [
-            "Products",
+            builder.AddAzureOpenAIClient("openai")
+                .AddChatClient("gpt-4o-mini")
+                .UseFunctionInvocation()
+                .UseOpenTelemetry(configure: c =>
+                    c.EnableSensitiveData = builder.Environment.IsDevelopment());
+
+            builder.Services.AddSingleton(new SqlListPlugin(builder.Configuration.GetConnectionString("SqlServer")!,
+            [
+                "Products",
 #if !DEBUG
             "Categories",
             "CustomerCustomerDemo",
@@ -40,27 +47,51 @@ public class Program
 #endif
         ]));
 
-        builder.Services.AddSingleton<ChartJsPlugin>();
+            builder.Services.AddSingleton<ChartJsPlugin>();
 
-        var app = builder.Build();
+            var app = builder.Build();
 
-        app.MapDefaultEndpoints();
+            app.MapDefaultEndpoints();
 
-        // Configure the HTTP request pipeline.
-        if (!app.Environment.IsDevelopment())
-        {
-            app.UseExceptionHandler("/Error", createScopeForErrors: true);
-            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-            app.UseHsts();
+            // Configure the HTTP request pipeline.
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Error", createScopeForErrors: true);
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseAntiforgery();
+
+            app.UseStaticFiles();
+            app.MapRazorComponents<App>()
+                .AddInteractiveServerRenderMode();
+
+            app.Run();
         }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Application terminated unexpectedly");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
 
-        app.UseHttpsRedirection();
-        app.UseAntiforgery();
+    private static void AddLogging(WebApplicationBuilder builder)
+    {
+        var loggerConfiguration = new LoggerConfiguration();
+        loggerConfiguration.Enrich.FromLogContext();
+        loggerConfiguration.Enrich.WithProperty("Version", Version.Current);
 
-        app.UseStaticFiles();
-        app.MapRazorComponents<App>()
-            .AddInteractiveServerRenderMode();
+        loggerConfiguration.MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning);
 
-        app.Run();
+        loggerConfiguration.WriteTo.Console(theme: AnsiConsoleTheme.Code);
+
+        Log.Logger = loggerConfiguration.CreateLogger();
+
+        builder.Services.AddSerilog();
     }
 }

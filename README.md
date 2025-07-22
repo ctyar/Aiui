@@ -5,54 +5,32 @@
 
 [Demo video](https://github.com/ctyar/Aiui/assets/1432648/b97d3bd2-f5a4-4c08-a17c-80904411cb07)
 
-This project aims to facilitate the creation of a new type of user interface for line of business applications.
+This project aims to showcase the creation of a new type of user interface for line of business applications.
 It will allow users to query data in their application using natural language and lower the barrier of accessing and analyzing data.
 This is similar to how most applications let users export data as excel files to do further analysis on their own.
 
 ## [Live demo: https://aiui.azurewebsites.net](https://aiui.azurewebsites.net/)
 
-## Usage
-1. Install the [NuGet package](https://www.nuget.org/packages/Aiui)
+## Privacy first
+This project is designed to be a mediator between your system and AI. Which means that it does not share any user data with AI.
+The only data that is sent to AI is the user query and the database schema.
 
-2. In the `Program.cs`, register the Aiui.
-```csharp
-using Aiui;
-```
-```csharp
-var builder = WebApplication.CreateBuilder(args);
+## What is the database schema?
+This sample is using The <a href="https://github.com/microsoft/sql-server-samples/tree/master/samples/databases/northwind-pubs">Northwind database</a>.
+It contains sales data for a fictitious company called “Northwind Traders” which imports and exports specialty foods from around the world.
+You can check the overview of the schema <a href="~/img/schema.png">here</a>.
 
-builder.Services.AddAiui(new AiuiOptions
-{
-    Client = new OpenAIClient(builder.Configuration.GetValue<string>("OpenApiKey")),
-    Plugins =
-    [
-        new SqlListPlugin(builder.Configuration.GetConnectionString("SqlServer")!, ["Categories", "Products"]
-        new ChartJsPlugin(),
-    ]
-});
-```
+## Has the AI been trained specifically on this database?
+No, the AI will receive information on the database schema at runtime.
 
-3. Pass user's prompt and chat history to the `BotService`.
-```csharp
-[HttpPost("")]
-public async Task<IActionResult> Index(string prompt, List<string> chatHistory)
-{
-    var executionResult = await _botService.ExecutePromptAsync(prompt, chatHistory, null);
+## Will the AI be able to access the data in the database?
+No, The AI will generate SQL queries which the library will execute.
 
-    return View(executionResult);
-}
-```
+## What if the user tries to access or execute malicious queries?
+You should use a read-only database user with minimum access to tables that the user needs.
 
-4. You can optionally use the Chart.js plugin to draw charts.
-```csharp
-[HttpPost("")]
-public async Task<IActionResult> Chart(string prompt, List<string> chatHistory, List<dynamic> rows)
-{
-    var executionResult = await _botService.ExecutePromptAsync(prompt, chatHistory, rows);
-
-    return View(executionResult);
-}
-```
+## What if the user tries to get information about other users?
+You should not share conversations between users.
 
 ## Build
 [Install](https://get.dot.net) the [required](global.json) .NET SDK.

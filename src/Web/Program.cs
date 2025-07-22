@@ -1,11 +1,11 @@
 using Aiui;
-using AIWeb.Web.Components;
 using Microsoft.Extensions.AI;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
+using Web.Components;
 
-namespace AIWeb.Web;
+namespace Web;
 
 public class Program
 {

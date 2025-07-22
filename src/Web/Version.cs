@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace AIWeb.Web;
+namespace Web;
 
 internal static class Version
 {

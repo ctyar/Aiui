@@ -2,7 +2,7 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.AI;
 
-namespace AIWeb.Web;
+namespace Web;
 
 public class RequestLogService
 {

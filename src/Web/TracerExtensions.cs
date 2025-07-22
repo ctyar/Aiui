@@ -1,6 +1,6 @@
 ﻿using OpenTelemetry.Trace;
 
-namespace AIWeb.Web;
+namespace Web;
 
 internal static class TracerExtensions
 {

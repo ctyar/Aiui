@@ -35,7 +35,7 @@ else
     <div class="chat-container">
         <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
         <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" OnNewChat="@ResetConversationAsync" />
-        <div>Version: @AIWeb.Web.Version.Current</div>
+        <div>Version: @Web.Version.Current</div>
     </div>
 }
 

@@ -9,7 +9,7 @@
 @inject IConfiguration configuration;
 @implements IDisposable
 
-<PageTitle>AIUI</PageTitle>
+<PageTitle>AI as User Interface</PageTitle>
 
 @if (!IsDbReady)
 {
@@ -35,6 +35,7 @@ else
     <div class="chat-container">
         <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
         <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" OnNewChat="@ResetConversationAsync" />
+        <div>Version: @AIWeb.Web.Version.Current</div>
     </div>
 }
 

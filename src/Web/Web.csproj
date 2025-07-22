@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Aiui\Aiui.csproj" />
-    <ProjectReference Include="..\AIWeb.ServiceDefaults\AIWeb.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Aiui\Aiui.csproj" />
+    <ProjectReference Include="..\Web.ServiceDefaults\Web.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

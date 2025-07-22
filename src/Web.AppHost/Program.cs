@@ -6,7 +6,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 //   dotnet user-secrets set ConnectionStrings:openai "Endpoint=https://models.inference.ai.azure.com;Key=YOUR-API-KEY"
 var openai = builder.AddConnectionString("openai");
 
-var webApp = builder.AddProject<Projects.AIWeb_Web>("aichatweb-app");
+var webApp = builder.AddProject<Projects.Web>("web");
 webApp.WithReference(openai);
 
 builder.Build().Run();

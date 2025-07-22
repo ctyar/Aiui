@@ -1,8 +1,8 @@
-﻿using Aiui;
-using Dapper;
+﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.AI;
 
-namespace AiuiWeb.RequestLog;
+namespace AIWeb.Web;
 
 public class RequestLogService
 {
@@ -17,7 +17,7 @@ public class RequestLogService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task SaveAsync(string? prompt, List<Message> chatHistory, string? response, CancellationToken cancellationToken)
+    public async Task SaveAsync(string? prompt, List<ChatMessage> messages, string? response, CancellationToken cancellationToken)
     {
         var sessionId = _httpContextAccessor.HttpContext!.Session.Id;
 
@@ -31,7 +31,7 @@ public class RequestLogService
                 {
                     sessionId = sessionId,
                     prompt = prompt,
-                    chatHistory = string.Join(",", chatHistory.Select(item => item.Content)),
+                    chatHistory = string.Join(",", messages.SelectMany(item => item.Contents)),
                     response = response
                 },
                 cancellationToken: cancellationToken);

@@ -171,7 +171,7 @@ Only use the tools available to you."));
             rootPrompts.Add(rootPrompt);
         }
 
-        rootPrompt = await SqlListPlugin.GetRootPromptAsync();
+        rootPrompt = await ChartJsPlugin.GetRootPromptAsync();
         if (rootPrompt is not null)
         {
             rootPrompts.Add(rootPrompt);

@@ -4,9 +4,10 @@
 @using Microsoft.Data.SqlClient
 @inject IChatClient ChatClient
 @inject NavigationManager Nav
-@inject Aiui.SqlListPlugin sqlListPlugin;
-@inject Aiui.ChartJsPlugin chartJsPlugin;
-@inject IConfiguration configuration;
+@inject Aiui.SqlListPlugin SqlListPlugin;
+@inject Aiui.ChartJsPlugin ChartJsPlugin;
+@inject IConfiguration Configuration;
+@inject ILogger<Chat> Logger
 @implements IDisposable
 
 <PageTitle>AI as User Interface</PageTitle>
@@ -136,7 +137,7 @@ else
 
     private async Task WaitForDbAsync()
     {
-        using var connection = new SqlConnection(configuration.GetConnectionString("SqlServer"));
+        using var connection = new SqlConnection(Configuration.GetConnectionString("SqlServer"));
 
         while (true)
         {
@@ -164,13 +165,13 @@ Only use the tools available to you."));
 
         var rootPrompts = new List<ChatMessage>();
 
-        var rootPrompt = await sqlListPlugin.GetRootPromptAsync();
+        var rootPrompt = await SqlListPlugin.GetRootPromptAsync();
         if (rootPrompt is not null)
         {
             rootPrompts.Add(rootPrompt);
         }
 
-        rootPrompt = await sqlListPlugin.GetRootPromptAsync();
+        rootPrompt = await SqlListPlugin.GetRootPromptAsync();
         if (rootPrompt is not null)
         {
             rootPrompts.Add(rootPrompt);
@@ -183,30 +184,34 @@ Only use the tools available to you."));
     private async Task ListAsync(
         [Description("The Microsoft SQL Server query.")] string sqlQuery)
     {
-        await InvokeAsync(StateHasChanged);
+        Logger.LogDebug("SqlQuery: {sqlQuery}", sqlQuery);
 
-        var data = await sqlListPlugin.ExecuteAsync(sqlQuery);
+        var data = await SqlListPlugin.ExecuteAsync(sqlQuery);
 
         Rows = (List<dynamic>?)data;
 
-        var contextPrompt = await chartJsPlugin.GetContextPromptAsync(Rows);
+        var contextPrompt = await ChartJsPlugin.GetContextPromptAsync(Rows);
         if (contextPrompt is null)
         {
             return;
         }
 
         ContextPrompts.AddRange(contextPrompt);
+
+        await InvokeAsync(StateHasChanged);
     }
 
     [Description("Receives the JavaScript code needed for Chart.js as string and draws the chart for the listed data.")]
     private async Task ChartAsync(
         [Description("The JavaScript code needed for Chart.js as string to draw a chart in an HTML canvas element with the id 'myChart'.")] string chartJsCode)
     {
-        await InvokeAsync(StateHasChanged);
+        Logger.LogDebug("ChartJsCode: {ChartJsCode}", chartJsCode);
 
-        var jsCode = await chartJsPlugin.ExecuteAsync(chartJsCode);
+        var jsCode = await ChartJsPlugin.ExecuteAsync(chartJsCode);
 
         GraphData = JsonSerializer.Serialize(Rows);
         GraphCode = (string?)jsCode;
+
+        await InvokeAsync(StateHasChanged);
     }
 }

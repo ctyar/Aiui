@@ -87,6 +87,7 @@ public class Program
         loggerConfiguration.Enrich.WithProperty("Version", Version.Current);
 
         loggerConfiguration.MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning);
+        loggerConfiguration.MinimumLevel.Override("Web", LogEventLevel.Debug);
 
         loggerConfiguration.WriteTo.Console(theme: AnsiConsoleTheme.Code);
 

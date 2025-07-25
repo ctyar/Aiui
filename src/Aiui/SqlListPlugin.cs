@@ -45,9 +45,9 @@ public sealed class SqlListPlugin : IPlugin
         });
     }
 
-    public Task<ChatMessage?> GetContextPromptAsync(object? context)
+    public Task<string?> GetContextPromptAsync(object? context)
     {
-        return Task.FromResult<ChatMessage?>(null);
+        return Task.FromResult<string?>(null);
     }
 
     public async Task<object?> ExecuteAsync(string sqlQuery)

@@ -7,7 +7,7 @@ public interface IPlugin
 {
     Task<ChatMessage?> GetRootPromptAsync();
 
-    Task<ChatMessage?> GetContextPromptAsync(object? context);
+    Task<string?> GetContextPromptAsync(object? context);
 
     Task<object?> ExecuteAsync(string aiResponse);
 }

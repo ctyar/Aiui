@@ -43,7 +43,6 @@ else
 @code {
     private readonly ChatOptions chatOptions = new();
     private readonly List<ChatMessage> messages = [];
-    private readonly List<ChatMessage> ContextPrompts = [];
     private CancellationTokenSource? currentResponseCancellation;
     private ChatMessage? currentResponseMessage;
     private ChatInput? chatInput;
@@ -65,13 +64,6 @@ else
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (ContextPrompts.Count > 0)
-        {
-            messages.AddRange(ContextPrompts);
-
-            ContextPrompts.Clear();
-        }
-
         if (!IsInitialSuggestionsLoaded && messages.Count > 0)
         {
             chatSuggestions?.Update(messages);
@@ -120,7 +112,7 @@ else
     private async Task ResetConversationAsync()
     {
         CancelAnyCurrentResponse();
-        
+
         messages.Clear();
         await SetRootPromptsAsync();
 
@@ -181,37 +173,29 @@ Only use the tools available to you."));
     }
 
     [Description("Displays a list of the data available in the database.")]
-    private async Task ListAsync(
+    private async Task<string?> ListAsync(
         [Description("The Microsoft SQL Server query.")] string sqlQuery)
     {
-        Logger.LogDebug("SqlQuery: {sqlQuery}", sqlQuery);
+        await InvokeAsync(StateHasChanged);
 
         var data = await SqlListPlugin.ExecuteAsync(sqlQuery);
 
         Rows = (List<dynamic>?)data;
 
         var contextPrompt = await ChartJsPlugin.GetContextPromptAsync(Rows);
-        if (contextPrompt is null)
-        {
-            return;
-        }
 
-        ContextPrompts.AddRange(contextPrompt);
-
-        await InvokeAsync(StateHasChanged);
+        return contextPrompt;
     }
 
     [Description("Receives the JavaScript code needed for Chart.js as string and draws the chart for the listed data.")]
     private async Task ChartAsync(
         [Description("The JavaScript code needed for Chart.js as string to draw a chart in an HTML canvas element with the id 'myChart'.")] string chartJsCode)
     {
-        Logger.LogDebug("ChartJsCode: {ChartJsCode}", chartJsCode);
+        await InvokeAsync(StateHasChanged);
 
         var jsCode = await ChartJsPlugin.ExecuteAsync(chartJsCode);
 
         GraphData = JsonSerializer.Serialize(Rows);
         GraphCode = (string?)jsCode;
-
-        await InvokeAsync(StateHasChanged);
     }
 }

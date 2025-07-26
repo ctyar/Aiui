@@ -66,6 +66,10 @@
     font-weight: 600;
 }
 
+.system-message {
+    white-space: pre-wrap;
+}
+
 /* Default styling for markdown-formatted assistant messages */
 ::deep ul {
     list-style-type: disc;

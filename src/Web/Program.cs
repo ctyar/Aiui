@@ -16,6 +16,7 @@ public class Program
             .AddInteractiveServerComponents();
 
         builder.AddAzureOpenAIClient("openai")
+            //.AddOpenAIClient("openai2")
             .AddChatClient("gpt-4o-mini")
             .UseFunctionInvocation()
             .UseOpenTelemetry(configure: c =>

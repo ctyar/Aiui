@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using DatabaseSchemaReader.DataSchema;
@@ -9,7 +10,7 @@ namespace Aiui;
 
 internal sealed class SqlServerService
 {
-    public List<string>? GetSchema(string connectionString, List<string> tables)
+    public static string? GetSchema(string connectionString, List<string> tables)
     {
         var tablesSchema = GetSchemaCore(connectionString, tables);
 
@@ -18,25 +19,21 @@ internal sealed class SqlServerService
             return null;
         }
 
-        var result = new List<string>
-        {
-            "We have a Microsoft SQL Server database with these tables."
-        };
+        var prompt = new StringBuilder();
+        prompt.Append("We have a Microsoft SQL Server database with the following tables:\r\n");
 
         // TODO: Test valid SQL instead of this
-        foreach (var table in tablesSchema)
+        foreach (var (index, table) in tablesSchema.Index())
         {
-            result.Add($"A table called [{table.Name}] with {table.Columns.Count} columns.");
+            prompt.Append($"{index}. [{table.Name}] with {table.Columns.Count} columns.\r\n");
 
-            var prompts = GetPrompts(table);
-
-            result.AddRange(prompts);
+            AddColumns(table, prompt);
         }
 
-        return result;
+        return prompt.ToString();
     }
 
-    public async Task<List<dynamic>?> QueryAsync(string connectionString, string query)
+    public static async Task<List<dynamic>?> QueryAsync(string connectionString, string query)
     {
         using var connection = new SqlConnection(connectionString);
 
@@ -70,21 +67,23 @@ internal sealed class SqlServerService
         }
     }
 
-    private static List<string> GetPrompts(DatabaseTable databaseTable)
+    private static void AddColumns(DatabaseTable databaseTable, StringBuilder prompt)
     {
-        var result = new List<string>();
-        var i = 1;
-
-        foreach (var column in databaseTable.Columns)
+        foreach (var (index, column) in databaseTable.Columns.Index())
         {
             var nullability = column.Nullable ? "nullable" : "non nullable";
-            var primaryKey = column.IsPrimaryKey ? "primary key" : string.Empty;
-            var foreignKey = column.IsForeignKey ? "foreign key" : string.Empty;
 
-            result.Add($"Column {i} called [{column.Name}] which is a {nullability} {column.DataType.TypeName} {primaryKey} {foreignKey}.");
-            i++;
+            var keyType = string.Empty;
+            if (column.IsPrimaryKey)
+            {
+                keyType = " primary key";
+            }
+            else if (column.IsForeignKey)
+            {
+                keyType = " foreign key";
+            }
+
+            prompt.Append($"    {index}. [{column.Name}] which is a {nullability} {column.DataType.TypeName}{keyType}.\r\n");
         }
-
-        return result;
     }
 }

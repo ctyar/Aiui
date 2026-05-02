@@ -40,9 +40,9 @@ public sealed class SqlListPlugin : IPlugin
         return Task.FromResult<string?>(null);
     }
 
-    public async Task<object?> ExecuteAsync(string sqlQuery)
+    public async Task<object?> ExecuteAsync(string aiResponse)
     {
-        var data = await SqlServerService.QueryAsync(_connectionString, sqlQuery);
+        var data = await SqlServerService.QueryAsync(_connectionString, aiResponse);
 
         return data;
     }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ internal sealed class SqlServerService
         // TODO: Test valid SQL instead of this
         foreach (var (index, table) in tablesSchema.Index())
         {
-            prompt.Append($"{index}. [{table.Name}] with {table.Columns.Count} columns.\r\n");
+            prompt.Append(CultureInfo.InvariantCulture, $"{index}. [{table.Name}] with {table.Columns.Count} columns.\r\n");
 
             AddColumns(table, prompt);
         }
@@ -83,7 +84,7 @@ internal sealed class SqlServerService
                 keyType = " foreign key";
             }
 
-            prompt.Append($"    {index}. [{column.Name}] which is a {nullability} {column.DataType.TypeName}{keyType}.\r\n");
+            prompt.Append(CultureInfo.InvariantCulture, $"    {index}. [{column.Name}] which is a {nullability} {column.DataType.TypeName}{keyType}.\r\n");
         }
     }
 }

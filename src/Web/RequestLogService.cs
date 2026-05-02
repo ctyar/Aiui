@@ -12,7 +12,7 @@ public class RequestLogService
 
     public RequestLogService(IConfiguration configuration, ILogger<RequestLogService> logger, IHttpContextAccessor httpContextAccessor)
     {
-        _connectionString = configuration.GetConnectionString("SqlServerWriter") ?? throw new Exception("Missing SqlServerWriter connection string.");
+        _connectionString = configuration.GetConnectionString("SqlServerWriter") ?? throw new InvalidOperationException("Missing SqlServerWriter connection string.");
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
     }
@@ -40,7 +40,7 @@ public class RequestLogService
         }
         catch (SqlException e)
         {
-            _logger.LogWarning(e, "Request logging failed");
+            _logger.RequestFailed(e);
         }
     }
 }

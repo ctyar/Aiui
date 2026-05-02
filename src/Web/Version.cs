@@ -12,8 +12,7 @@ internal static class Version
         {
             if (CurrentValue is null)
             {
-                var assembly = Assembly.GetExecutingAssembly();
-                CurrentValue = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? string.Empty;
+                CurrentValue = Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString(3) ?? string.Empty;
             }
 
             return CurrentValue;

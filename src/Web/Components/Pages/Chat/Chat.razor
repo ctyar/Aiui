@@ -8,11 +8,13 @@
 @inject Aiui.ChartJsPlugin ChartJsPlugin;
 @inject IConfiguration Configuration;
 @inject ILogger<Chat> Logger
+@inject RequestLogService RequestLogService;
+@inject IWebHostEnvironment WebHostEnvironment;
 @implements IDisposable
 
 <PageTitle>AI as User Interface</PageTitle>
 
-@if (!IsDbReady)
+@if (!isDbReady)
 {
     <div class="chat-container page-width">
         <div><strong>Starting up the SQL Server</strong></div>
@@ -29,9 +31,9 @@ else
         </NoMessagesContent>
     </ChatMessageList>
 
-    <Graph Data="@GraphData" Code="@GraphCode" />
+    <Graph Data="@graphData" Code="@graphCode" />
 
-    <DataTable Rows="Rows" />
+    <DataTable Rows="rows" />
 
     <div class="chat-container">
         <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
@@ -47,11 +49,12 @@ else
     private ChatMessage? currentResponseMessage;
     private ChatInput? chatInput;
     private ChatSuggestions? chatSuggestions;
-    private List<dynamic>? Rows;
-    private string? GraphData;
-    private string? GraphCode;
-    private bool IsDbReady = false;
-    private bool IsInitialSuggestionsLoaded = false;
+    private List<dynamic>? rows;
+    private string? graphData;
+    private string? graphCode;
+    private bool isDbReady = false;
+    private bool isInitialSuggestionsLoaded = false;
+    private Guid conversionId = Guid.NewGuid();
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,7 +67,7 @@ else
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (!IsInitialSuggestionsLoaded && messages.Count > 0)
+        if (!isInitialSuggestionsLoaded && messages.Count > 0)
         {
             chatSuggestions?.Update(messages);
         }
@@ -95,6 +98,11 @@ else
         messages.Add(currentResponseMessage!);
         currentResponseMessage = null;
         chatSuggestions?.Update(messages);
+
+        if (!WebHostEnvironment.IsDevelopment() || true)
+        {
+            await RequestLogService.SaveAsync(userMessage.Text, messages, conversionId);
+        }
     }
 
     private void CancelAnyCurrentResponse()
@@ -115,6 +123,8 @@ else
 
         messages.Clear();
         await SetRootPromptsAsync();
+
+        conversionId = Guid.NewGuid();
 
         chatSuggestions?.Clear();
         chatSuggestions?.Update(messages);
@@ -137,7 +147,7 @@ else
             {
                 await connection.OpenAsync();
                 connection.Close();
-                IsDbReady = true;
+                isDbReady = true;
                 return;
             }
             catch (SqlException)
@@ -180,9 +190,9 @@ Only use the tools available to you."));
 
         var data = await SqlListPlugin.ExecuteAsync(sqlQuery);
 
-        Rows = (List<dynamic>?)data;
+        rows = (List<dynamic>?)data;
 
-        var contextPrompt = await ChartJsPlugin.GetContextPromptAsync(Rows);
+        var contextPrompt = await ChartJsPlugin.GetContextPromptAsync(rows);
 
         return contextPrompt;
     }
@@ -195,7 +205,7 @@ Only use the tools available to you."));
 
         var jsCode = await ChartJsPlugin.ExecuteAsync(chartJsCode);
 
-        GraphData = JsonSerializer.Serialize(Rows);
-        GraphCode = (string?)jsCode;
+        graphData = JsonSerializer.Serialize(rows);
+        graphCode = (string?)jsCode;
     }
 }

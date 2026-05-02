@@ -40,6 +40,7 @@ public class Program
         ]));
 
         builder.Services.AddSingleton<ChartJsPlugin>();
+        builder.Services.AddSingleton<RequestLogService>();
 
         var app = builder.Build();
 

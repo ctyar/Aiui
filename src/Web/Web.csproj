@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <UserSecretsId>6ff4e27d-138d-4c42-938d-54700da05e18</UserSecretsId>
-    <VersionPrefix>3.0.0</VersionPrefix>
   </PropertyGroup>
 
   <ItemGroup>

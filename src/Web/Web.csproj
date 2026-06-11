@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="13.2.4-preview.1.26224.4" />
+    <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="13.4.3-preview.1.26305.13" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.7.0" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.7.0" />
     <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="10.7.0" />

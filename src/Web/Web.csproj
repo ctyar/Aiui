@@ -9,7 +9,7 @@
     <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="13.4.3-preview.1.26305.13" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.8.3" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.8.0" />
-    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="10.8.0" />
+    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="10.9.0" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.17.0" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.17.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.17.0" />
